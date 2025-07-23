@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "M6zRbCWYVmc=",
+  "success": true,
+  "projectFilePath": "/home/travis/Projects/dotnet_finstack/FinStack.Infrastructure/FinStack.Infrastructure.csproj",
+  "expectedPackageFiles": [
+    "/home/travis/.nuget/packages/microsoft.aspnetcore.app.ref/9.0.5/microsoft.aspnetcore.app.ref.9.0.5.nupkg.sha512"
+  ],
+  "logs": []
+}
