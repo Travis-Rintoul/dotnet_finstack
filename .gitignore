@@ -1,0 +1,4 @@
+FinStack.Engine/target/
+FinStack.Web/node_modules
+FinStack.API/bin
+FinStack.API/obj
