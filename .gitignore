@@ -2,3 +2,7 @@ FinStack.Engine/target/
 FinStack.Web/node_modules
 FinStack.API/bin
 FinStack.API/obj
+FinStack.Domain/bin
+FinStack.Domain/obj
+FinStack.Infrastructure/bin
+FinStack.Infrastructure/obj
