@@ -1,5 +1,10 @@
+using MediatR;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using FinStack.Application.Queries;
+using FinStack.Application.Dtos;
 
 namespace FinStack.API.Controllers
 {
@@ -7,11 +12,17 @@ namespace FinStack.API.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
+        private readonly IMediator _mediator;
+        public UserController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
         // GET: api/user
         [HttpGet]
-        public ActionResult<IEnumerable<string>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            return Ok(new List<string> { "user1", "user2", "user3", "user4" });
+            return Ok(await _mediator.Send(new GetUsersQuery()));
         }
 
         // GET: api/user/{id}
