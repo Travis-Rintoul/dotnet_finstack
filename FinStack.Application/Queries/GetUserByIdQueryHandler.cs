@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FinStack.Domain.Repositories;
 using MediatR;
-using FinStack.Application.Dtos;
+using FinStack.Application.DTOs;
 using LanguageExt;
 
 namespace FinStack.Application.Queries
