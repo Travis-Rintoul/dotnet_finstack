@@ -1,18 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using FinStack.Domain.Entities;
+using FinStack.Infrastructure.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
-namespace FinStack.Infrastructure.Data
+namespace FinStack.Infrastructure.Data;
+
+public class AppDbContext : IdentityDbContext<AuthUser>
 {
-    public class AppDbContext : DbContext
-    {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
 
-        public DbSet<User> Users { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-        }
-    }
+    public DbSet<User> Users { get; set; }
 }

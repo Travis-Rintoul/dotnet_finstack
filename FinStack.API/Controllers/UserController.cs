@@ -4,25 +4,21 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FinStack.Application.Queries;
-using FinStack.Application.Dtos;
+using FinStack.Application.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FinStack.API.Controllers
 {
+    [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
-    public class UserController : ControllerBase
+    [Route("api/v1/[controller]")]
+    public class UserController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-        public UserController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-
         // GET: api/user
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            return Ok(await _mediator.Send(new GetUsersQuery()));
+            return Ok(await mediator.Send(new GetUsersQuery()));
         }
 
         // GET: api/user/{id}
