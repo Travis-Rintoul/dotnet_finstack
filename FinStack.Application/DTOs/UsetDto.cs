@@ -1,6 +1,14 @@
 namespace FinStack.Application.DTOs;
-public class UserDto(Guid id, string email)
+public class UserDto
 {
-    public Guid Id { get; } = id;
-    public string Email { get; } = email;
+    public UserDto() {}
+    public UserDto(Guid guid, string email)
+    {
+        Id = guid;
+        Email = email;
+    }
+    
+    public Guid Id { get; set; }
+    public string UserName { get; set; }
+    public string Email { get; set; }
 }
