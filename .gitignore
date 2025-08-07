@@ -1,10 +1,30 @@
+# Engine
 FinStack.Engine/target/
+
+# Web
 FinStack.Web/node_modules
+
+# API
 FinStack.API/bin
 FinStack.API/obj
+FinStack.API/output.log
+
+# Domain
 FinStack.Domain/bin
 FinStack.Domain/obj
+
+# Infrastructure
 FinStack.Infrastructure/bin
 FinStack.Infrastructure/obj
+
+#Application
 FinStack.Application/bin
 FinStack.Application/obj
+
+#Test
+FinStack.Test/bin
+FinStack.Test/obj
+
+#Common
+FinStack.Common/bin
+FinStack.Common/obj
