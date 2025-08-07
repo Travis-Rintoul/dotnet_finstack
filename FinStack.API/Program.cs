@@ -1,5 +1,6 @@
 
 using System.Text;
+using FinStack.Application.Commands;
 using FinStack.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using FinStack.Infrastructure.Data;
@@ -7,6 +8,7 @@ using MediatR;
 using FinStack.Domain.Repositories;
 using FinStack.Infrastructure.Repositories;
 using FinStack.Application.Queries;
+using FinStack.Infrastructure.Commands;
 using FinStack.Infrastructure.Entities;
 using FinStack.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -23,6 +25,7 @@ builder.Services.AddIdentity<AuthUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEngineService, RustFinancialEngine>();
 
 builder.Services.AddAuthentication(options =>
         {
@@ -50,6 +53,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers();
 builder.Services.AddMediatR(typeof(Program).Assembly);
 builder.Services.AddMediatR(typeof(GetUsersQueryHandler).Assembly);
+builder.Services.AddMediatR(typeof(CreateUserCommand).Assembly);
+builder.Services.AddMediatR(typeof(CreateAuthUserCommand).Assembly);
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();

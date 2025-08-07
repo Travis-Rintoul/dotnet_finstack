@@ -1,10 +1,7 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using FinStack.Domain.Repositories;
 using MediatR;
 using FinStack.Application.DTOs;
-using LanguageExt;
+using FinStack.Common;
 
 namespace FinStack.Application.Queries
 {
@@ -25,7 +22,7 @@ namespace FinStack.Application.Queries
 
             return userOption.Match(
                 user => new UserDto(user.Guid, user.Email),
-                () => Option<UserDto>.None
+                () => Option<UserDto>.None()
             );
         }
     }

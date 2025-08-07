@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using MediatR;
 using FinStack.Domain.Repositories;
 using FinStack.Application.DTOs;
-using LanguageExt;
-using static LanguageExt.Prelude;
 
 namespace FinStack.Application.Queries
 {
