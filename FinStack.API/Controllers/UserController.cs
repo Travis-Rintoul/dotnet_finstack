@@ -12,7 +12,7 @@ namespace FinStack.API.Controllers
     [Authorize]
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class UserController(IMediator mediator) : ControllerBase
+    public class UserController(IMediator mediator, IEngineService engine) : ControllerBase
     {
         // GET: api/user
         [HttpGet]
@@ -48,5 +48,14 @@ namespace FinStack.API.Controllers
         {
             return NoContent();
         }
+
+        // TODO: remove debug call to engine
+        [HttpGet]
+        public async Task<ActionResult> Test()
+        {
+            string json = "{ \"file_name\": \"test.json\" }";
+            return Ok(engine.ProcessJob("import-file", json))
+        }
+
     }
 }

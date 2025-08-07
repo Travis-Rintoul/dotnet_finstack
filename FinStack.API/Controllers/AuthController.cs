@@ -1,6 +1,5 @@
+using FinStack.Application.DTOs;
 using FinStack.Application.Interfaces;
-using FinStack.Infrastructure.Services;
-using LanguageExt;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinStack.API.Controllers;
@@ -10,14 +9,12 @@ namespace FinStack.API.Controllers;
 public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] LoginDto dto)
+    public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
     {
-        var result = await authService.RegisterAsync(dto.Email, dto.Password);
-        
-        if (!result.Succeeded)
-            return BadRequest(result.Errors);
-
-        return Ok("User registered successfully.");
+        return (await authService.RegisterAsync(dto)).Match<IActionResult>(
+            guid => Ok(guid),
+            BadRequest
+        );
     }
 
     [HttpPost("login")]
@@ -25,8 +22,8 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         var token = await authService.LoginAsync(dto.Email, dto.Password);
         return token.Match<IActionResult>(
-            Some: Ok,
-            None: () => Unauthorized("Invalid credentials")
+            Ok,
+            BadRequest
         );
     }
 }
