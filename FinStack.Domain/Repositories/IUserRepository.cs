@@ -1,6 +1,5 @@
-using LanguageExt;
-using LanguageExt.Common;
 
+using FinStack.Common;
 using FinStack.Domain.Entities;
 
 namespace FinStack.Domain.Repositories

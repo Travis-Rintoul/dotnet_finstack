@@ -6,7 +6,9 @@ namespace FinStack.Domain.Entities
         public Guid Guid { get; set; }
         public string Email { get; set; }
         public string Name { get; set; }
-        public DateTime CreatedDate { get; private set; }
+        public DateTime CreatedDate { get; set; }
+        
+        public User() {}
 
         public User(string email, string name)
         {
