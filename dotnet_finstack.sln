@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinStack.Application", "Fin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinStack.Domain", "FinStack.Domain\FinStack.Domain.csproj", "{07ADB6B6-D0EE-454C-B189-926B2E840357}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinStack.Common", "FinStack.Common\FinStack.Common.csproj", "{0A330120-7532-400F-976B-7B79108C9936}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinStack.Test", "FinStack.Test\FinStack.Test.csproj", "{FAEA7FD2-CA37-4DED-A4B6-06DB4C241121}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +40,13 @@ Global
 		{07ADB6B6-D0EE-454C-B189-926B2E840357}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07ADB6B6-D0EE-454C-B189-926B2E840357}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07ADB6B6-D0EE-454C-B189-926B2E840357}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A330120-7532-400F-976B-7B79108C9936}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A330120-7532-400F-976B-7B79108C9936}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A330120-7532-400F-976B-7B79108C9936}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A330120-7532-400F-976B-7B79108C9936}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAEA7FD2-CA37-4DED-A4B6-06DB4C241121}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAEA7FD2-CA37-4DED-A4B6-06DB4C241121}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAEA7FD2-CA37-4DED-A4B6-06DB4C241121}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAEA7FD2-CA37-4DED-A4B6-06DB4C241121}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
