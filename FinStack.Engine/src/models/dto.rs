@@ -13,5 +13,10 @@ pub struct UserDto{
 pub struct JobDto{
     pub id: i32,
     pub guid: Uuid,
-    pub created_date: DateTime<Utc>,
+    pub job_code: String,
+    pub elapsed: i64,
+    pub success: bool,
+    pub start_time: DateTime<Utc>,
+    pub finish_time: DateTime<Utc>,
+    pub message: String,
 }
