@@ -50,11 +50,12 @@ namespace FinStack.API.Controllers
         }
 
         // TODO: remove debug call to engine
-        [HttpGet]
+        [AllowAnonymous]
+        [HttpGet("test")]
         public async Task<ActionResult> Test()
         {
             string json = "{ \"file_name\": \"test.json\" }";
-            return Ok(engine.ProcessJob("import-file", json))
+            return Ok(engine.ProcessJob("import-file", json));
         }
 
     }
