@@ -12,6 +12,7 @@ pub fn ptr_to_string(ptr: *const i8) -> Option<String> {
     unsafe { CStr::from_ptr(ptr).to_str().ok().map(|s| s.to_string()) }
 }
 
+
 static LOGGER_INIT: Once = Once::new();
 
 pub fn setup_logger() -> Result<(), Box<dyn std::error::Error>> {

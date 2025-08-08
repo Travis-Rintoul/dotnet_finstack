@@ -14,8 +14,8 @@
 - [x] Create CI/CD build pipelines for each service
 
 ### 🔐 Authentication & Accounts
-- [ ] Basic JWT-based user authentication  
-- [ ] Account creation & login APIs  
+- [x] Basic JWT-based user authentication  
+- [x] Account creation & login APIs  
 - [ ] Role-based access control (admin, trader, viewer)
 
 ### ⚙️ Trading Core (Rust)

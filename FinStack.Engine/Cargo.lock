@@ -320,6 +320,7 @@ dependencies = [
  "async-trait",
  "chrono",
  "log",
+ "once_cell",
  "serde",
  "serde_json",
  "simplelog",
