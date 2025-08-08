@@ -9,7 +9,7 @@ mod utils;
 
 use log::{error, info};
 use crate::{
-    services::{job_parser::JobParser, job_service::JobService}, utils::{ptr_to_string, setup_logger}
+    services::{job_parser::JobParser, job_service::JobService}, utils::setup_logger
 };
 
 #[unsafe(no_mangle)]
@@ -23,17 +23,7 @@ pub unsafe extern "C" fn schedule_job(job_code_ptr: *const i8, job_body_ptr: *co
         let service = JobService::new();        
         let parser = JobParser::new();
 
-        if let Err(error) = parser.parse_pointers(job_code_ptr, job_body_ptr) {
-            log::error!("{error}");
-            return Err(-2);
-        };
-
-        if let Ok(job) = parser.parse_json_body(job_code_ptr, job_body_ptr) {
-            log::error!("{error}");
-            return Err(-2);
-        };
-
-        let job = service
+        let job = parser
             .parse(job_code_ptr, job_body_ptr)
             .inspect(|_| info!("Successfully parsed request..."))
             .map_err(|e| {
