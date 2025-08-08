@@ -1,38 +1,24 @@
-use sqlx::{query, Error};
+use sqlx::Error;
 
 use crate::{db::DbContext, models::JobDto};
-
-pub async fn get_jobs() -> Result<Vec<JobDto>, Error> {
-    let db = DbContext::connect().await?;
-    let sql = r#"
-        SELECT 
-            "Id" as "id", 
-            "Email" as "email", 
-            "Name" as "name"
-        FROM "Users"
-        ORDER BY "Name"
-    "#;
-
-    let query = sqlx::query_as::<_, JobDto>(sql);
-
-    match query.fetch_all(&db.pool).await {
-        Ok(users) => Ok(users),
-        Err(e) => Err(e),
-    }
-}
 
 pub async fn create_job(job: JobDto) -> Result<u64, Error> {
     let db = DbContext::connect().await?;
     let sql = r#"
         INSERT INTO "Jobs" 
-            ("Guid", "CreatedDate")
+            ("Guid", "JobType", "Success", "ElapsedMs", "StartTime", "FinishTime", "Message")
             VALUES 
-            ($1, $2)
+            ($1, $2, $3, $4, $5, $6, $7)
     "#;
 
     let query = sqlx::query(sql)
         .bind(job.guid)
-        .bind(job.created_date);
+        .bind(job.job_code)
+        .bind(job.success)
+        .bind(job.elapsed)
+        .bind(job.start_time)
+        .bind(job.finish_time)
+        .bind(job.message);
 
     let query_result = query    
         .execute(&db.pool)
