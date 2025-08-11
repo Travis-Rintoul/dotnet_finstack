@@ -1,9 +1,9 @@
 use chrono::Utc;
 use once_cell::sync::Lazy;
-use tokio::{runtime::Runtime, time::error};
+use tokio::runtime::Runtime;
 use uuid::Uuid;
 
-use crate::{db::create_job, models::JobDto, services::job_runner::JobRunner, traits::ScheduledJob, utils::ptr_to_string};
+use crate::{db::{DbContext, JobsRepository, Repository}, models::JobDto, services::job_runner::JobRunner, traits::ScheduledJob};
 
 static TOKIO_RUNTIME: Lazy<Runtime> = Lazy::new(|| {
     Runtime::new().expect("Failed to create Tokio runtime")
@@ -19,11 +19,20 @@ impl JobService {
 
     pub fn schedule_and_run(&self, job: Box<dyn ScheduledJob>) -> Result<(), String> {
         let validate = job.validate();
-        let validate_copy = validate.clone();
+
+        if let Err(error) = &validate {
+            return Err(error.clone());
+        }
 
         TOKIO_RUNTIME.spawn(async move {
-            let job_code = job.code().to_string(); 
+
+            let Ok(ctx) = DbContext::connect().await else {
+                return Err("Unable to connect to DB");
+            };
+
             let dto: JobDto;
+            let job_code = job.code().to_string(); 
+            let jobs = JobsRepository::new(ctx);
 
             if let Err(error) = validate {
                 log::error!("Failed Validation: {error}");
@@ -53,12 +62,13 @@ impl JobService {
                 };
             }
 
-            create_job(dto).await;
+            if let Err(e) = jobs.create(dto).await {
+                log::error!("Failed to create job record: {}", e);
+            }
+
+            Ok(())
         });
 
-        match validate_copy {
-            Ok(_) => Ok(()),
-            Err(error) => Err(error),
-        }
+        Ok(())
     }
 }

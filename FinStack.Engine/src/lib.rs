@@ -31,6 +31,8 @@ pub unsafe extern "C" fn schedule_job(job_code_ptr: *const i8, job_body_ptr: *co
                 -4
             })?;
 
+            
+
         match service.schedule_and_run(job) {
             Ok(_) => Ok(()),
             Err(_) => Err(-5) // Failed Validation

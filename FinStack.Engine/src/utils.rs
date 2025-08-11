@@ -1,7 +1,7 @@
 use std::{ffi::CStr, fs::File};
 
-use std::sync::Once;
-use log::LevelFilter;
+use std::sync::{Arc, Mutex, Once};
+use log::{Level, LevelFilter, Metadata, Record};
 use simplelog::{CombinedLogger, Config, WriteLogger};
 
 pub fn ptr_to_string(ptr: *const i8) -> Option<String> {

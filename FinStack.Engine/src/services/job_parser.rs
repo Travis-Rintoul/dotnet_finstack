@@ -47,6 +47,4 @@ impl JobParser {
             .map(|t| Box::new(t) as Box<dyn ScheduledJob>)
             .map_err(|e| e.to_string())
     }
-
-
 }
