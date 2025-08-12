@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::{db::{DbContext, JobsRepository}, models::JobCode};
+use crate::{db::{DbContext, JobsRepository}, models::JobCode, services::command_router::Command};
 
 pub struct JobContext {
     db_context: DbContext,
@@ -8,9 +8,5 @@ pub struct JobContext {
 }
 
 #[async_trait::async_trait]
-pub trait ScheduledJob: Send + Sync {
-    fn validate(&self) -> Result<(), String>;
-    async fn prepare() -> Result<(), JobContext>;
-    async fn execute(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>>;
-    fn code(&self) -> JobCode;
-}
+pub trait ScheduledJob: Send + Sync { }
+

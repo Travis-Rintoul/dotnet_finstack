@@ -1,3 +1,4 @@
+mod commands;
 mod config;
 mod db;
 mod error;
@@ -7,39 +8,43 @@ mod services;
 mod traits;
 mod utils;
 
-use log::{error, info};
+use std::ffi::c_char;
+
 use crate::{
-    services::{job_parser::JobParser, job_service::JobService}, utils::setup_logger
+    services::{command_parser::CommandParser, job_scheduler::schedule_job_and_run},
+    utils::{ptr_to_string, setup_logger},
 };
 
+#[repr(C)]
+pub struct JobGuid([u8; 16]);
+
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn schedule_job(job_code_ptr: *const i8, job_body_ptr: *const i8) -> i32 {
-    fn inner(job_code_ptr: *const i8, job_body_ptr: *const i8) -> Result<(), i32> {
+pub unsafe extern "C" fn schedule_job(
+    command_name_ptr: *const i8,
+    command_args_ptr: *const i8,
+) -> *mut c_char {
+    fn inner(command_name_ptr: *const i8, command_args_ptr: *const i8) -> Result<JobGuid, i32> {
         if let Err(e) = setup_logger() {
             eprintln!("Logger initialization failed: {}", e);
             return Err(-1);
         }
 
-        let service = JobService::new();        
-        let parser = JobParser::new();
+        let Some(command_name) = ptr_to_string(command_name_ptr) else {
+            return Err(-2);
+        };
 
-        let job = parser
-            .parse(job_code_ptr, job_body_ptr)
-            .inspect(|_| info!("Successfully parsed request..."))
-            .map_err(|e| {
-                error!("Parsing job: {e}");
-                -4
-            })?;
+        let Some(command_args) = ptr_to_string(command_args_ptr) else {
+            return Err(-3);
+        };
 
-            
+        let Ok(command) = CommandParser::parse(&command_name, &command_args) else {
+            return Err(-4);
+        };
 
-        match service.schedule_and_run(job) {
-            Ok(_) => Ok(()),
-            Err(_) => Err(-5) // Failed Validation
-        }
+        Ok(schedule_job_and_run(command))
     }
 
-    match inner(job_code_ptr, job_body_ptr) {
+    match inner(command_name_ptr, command_args_ptr) {
         Ok(()) => 1,
         Err(code) => code,
     }

@@ -1,12 +1,40 @@
+use async_trait::async_trait;
 use uuid::Uuid;
+
+use crate::db::{DbContext, JobsRepository, JobsRepositoryTrait, MockJobsRepository};
 
 pub trait Entity {}
 
-pub trait Repository<T, E: Entity> {
-    async fn create(&self, entity: T) -> Result<Uuid, sqlx::Error>;
-    async fn find_by_id(&self, id: u32) -> Option<T>;
-    async fn find_all(&self, ) -> Vec<T>;
-    async fn update(&self, entity: T) -> Result<Uuid, sqlx::Error>;
-    async fn remove(&self, entity: T) -> Result<(), sqlx::Error>;
+
+pub trait RepositoryFactoryTrait: Send + Sync {
+    fn jobs(&self, db_context: DbContext) -> Box<dyn JobsRepositoryTrait>;
 }
 
+pub struct RepositoryFactory;
+
+impl RepositoryFactory {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl RepositoryFactoryTrait for RepositoryFactory {
+    fn jobs(&self, db_context: DbContext) -> Box<dyn JobsRepositoryTrait> {
+        Box::new(JobsRepository::new(db_context))
+    }
+}
+
+pub struct MockRepositoryFactory;
+
+impl MockRepositoryFactory {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+#[async_trait]
+impl RepositoryFactoryTrait for MockRepositoryFactory {
+    fn jobs(&self, db_context: DbContext) -> Box<dyn JobsRepositoryTrait> {
+        Box::new(MockJobsRepository::new(db_context))
+    }
+}
