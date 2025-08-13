@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::{db::{DbContext, JobsRepository}, models::JobCode, services::command_router::Command};
+use crate::{db::{DbContext, JobsRepository}, models::JobCode};
 
 pub struct JobContext {
     db_context: DbContext,

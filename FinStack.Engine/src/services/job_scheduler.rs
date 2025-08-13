@@ -1,20 +1,27 @@
+use std::{any::Any, sync::Arc};
+
 use chrono::Utc;
 use once_cell::sync::Lazy;
 use tokio::runtime::Runtime;
-use uuid::Uuid;
 
 use crate::{
-    db::{DbContext, JobsRepository, JobsRepositoryTrait, RepositoryFactory}, models::JobDto, services::{
-        command_builder::CommandRequestBuilder,
-        command_router::Command, job_runner::JobResult,
-    }, JobGuid
+    JobGuid,
+    commands::CreateJobCommand,
+    db::{DbContext, JobsRepository, JobsRepositoryTrait, RepositoryFactory},
+    models::JobDto,
+    services::{
+        command_router::{CommandDependencies, CommandRouter},
+        job_runner::JobResult,
+    },
 };
 
 static TOKIO_RUNTIME: Lazy<Runtime> =
     Lazy::new(|| Runtime::new().expect("Failed to create Tokio runtime"));
 
-pub fn schedule_job_and_run(command: Command) -> JobGuid {
-
+pub fn schedule_job_and_run(
+    command_name: String,
+    command: Box<dyn Any + Send + Sync>
+) -> JobGuid {
     let job_guid = uuid::Uuid::new_v4();
 
     TOKIO_RUNTIME.spawn(async move {
@@ -22,61 +29,63 @@ pub fn schedule_job_and_run(command: Command) -> JobGuid {
             return Err("Unable to connect to DB");
         };
 
-        let router = CommandRequestBuilder::new()
-            .add_db_context(ctx)
-            .add_repository_factory(Box::new(RepositoryFactory::new()))
-            .build();
+        let db_context = Arc::new(ctx);
+        let repo_factory = RepositoryFactory::new(Arc::clone(&db_context));
 
+        let deps = Arc::new(CommandDependencies::new(
+            Arc::clone(&db_context),
+            Box::new(repo_factory),
+        ))
+        ;
+        let router = CommandRouter::new(deps);
+
+        //let command_name: String = command.name();
         let start_time = Utc::now();
-        log::info!("Job Started {:?} at {}", command.into(), start_time);
+        log::info!(
+            "Job Started {} ({:?}) at {}",
+            command_name,
+            job_guid,
+            start_time
+        );
 
         let command_result = router.send(command).await;
 
         let finish_time = Utc::now();
         let elapsed = finish_time - start_time;
 
-        log::info!("Job Finished {:?} at {} elapsed {:.3}", command.into(), finish_time, elapsed);
+        log::info!(
+            "Job Finished {} ({:?}) at {} elapsed {:.3}",
+            command_name,
+            job_guid,
+            finish_time,
+            elapsed
+        );
 
         let elapsed_us: i64 = elapsed.num_microseconds().unwrap_or(0);
 
-        let job_result = match command_result {
-            Ok(_) => JobResult {
-                success: true,
-                elapsed: elapsed_us,
-                start_time: start_time,
-                finish_time: finish_time,
-                message: "".to_string(),
-            },
-            Err(e) => JobResult {
-                success: false,
-                elapsed: elapsed_us,
-                start_time: start_time,
-                finish_time: finish_time,
-                message: format!("{e}")
-            },
+        let (success, message) = match command_result {
+            Ok(_) => (true, String::new()),
+            Err(e) => (false, e.to_string()),
         };
 
-        let dto = JobDto {
-            id: -1,
-            guid: job_guid,
-            job_code: todo!(),
-            elapsed: todo!(),
-            success: todo!(),
+        let create_job_cmd = Box::new(CreateJobCommand {
+            job_guid,
+            job_code: command_name,
+            elapsed: elapsed_us,
+            success: success,
             start_time,
             finish_time,
-            message: todo!(),
-        };
+            message,
+        });
 
-        let repository = JobsRepository::new(ctx);
+        let result = router.send(create_job_cmd).await;
 
-
-
-        repository.create(dto).await;
-
+        if result.is_err() {
+            log::error!("ERROR CREATING JOB");
+        }
 
         Ok(())
     });
 
     JobGuid(*job_guid.as_bytes())
-
 }
