@@ -1,15 +1,12 @@
-use std::{any::Any, sync::Arc};
-
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
+use serde::Deserialize;
+use std::{error::Error, sync::Arc};
 use uuid::Uuid;
 
-use crate::{
-    models::JobDto,
-    services::commands_service::{CommandDependencies, CommandError, CommandHandler},
-};
+use crate::{models::JobDto, services::commands_service::{CommandDependencies, CommandTrait}};
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct CreateJobCommand {
     pub job_guid: Uuid,
     pub job_code: String,
@@ -20,40 +17,32 @@ pub struct CreateJobCommand {
     pub message: String,
 }
 
-pub struct CreateJobCommandHandler;
-
 #[async_trait]
-impl CommandHandler<CreateJobCommand> for CreateJobCommandHandler {
-    async fn handle(
-        &self,
-        dependencies: Arc<CommandDependencies>,
-        args: CreateJobCommand,
-    ) -> Result<Box<dyn Any + Send>, CommandError> {
-        log::info!("Running CreateJobCommand");
-
-        let Some(repo_factory) = &dependencies.repository_factory else {
+impl CommandTrait for CreateJobCommand {
+    async fn handle(&self, services: Arc<CommandDependencies>) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let Some(repo_factory) = &services.repository_factory else {
             log::error!("Unable to initialize repository");
             return Err("".into());
         };
 
         let jobs_repository = repo_factory.create_jobs_repository();
-
         let dto = JobDto {
             id: -1,
-            guid: args.job_guid,
-            job_code: args.job_code,
-            elapsed: args.elapsed,
-            success: args.success,
-            start_time: args.start_time,
-            finish_time: args.finish_time,
-            message: args.message,
+            guid: self.job_guid,
+            job_code: self.job_code.clone(),
+            elapsed: self.elapsed,
+            success: self.success,
+            start_time: self.start_time,
+            finish_time: self.finish_time,
+            message: self.message.clone(),
         };
 
         if let Err(error) = jobs_repository.create(dto).await {
+            log::error!("{}", error);
             return Err(format!("{error}").into());
         }
 
-        Ok(Box::new(()) as Box<dyn Any + Send>)
+        Ok(())
     }
 }
 
@@ -89,7 +78,7 @@ mod tests {
             message: "".to_string(),
         };
 
-        let result = router.send(Box::new(command)).await;
+        let result = router.send(command).await;
         assert!(result.is_ok(), "Handler should return Ok result");
     }
 
@@ -118,7 +107,8 @@ mod tests {
             message: "".to_string(),
         };
 
-        let result = router.send(Box::new(command)).await;
+        let result = router.send(command).await;
         assert!(result.is_err(), "Handler should return Err result");
     }
 }
+

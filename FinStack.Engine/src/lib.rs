@@ -1,8 +1,7 @@
+use serde_json::from_str;
+
 use crate::{
-    services::{
-        commands_service::{Command, CommandParser},
-        job_scheduler::schedule_job_and_run,
-    },
+    services::{commands_service::Command, job_scheduler::schedule_job_and_run},
     utils::{ptr_to_string, setup_logger},
 };
 mod commands;
@@ -50,15 +49,12 @@ pub unsafe extern "C" fn schedule_job(
 
         log::info!("{command_code} {command_body}");
 
-        let parser = CommandParser::new();
+        let command: Command = from_str(&command_body).map_err(|e| {
+            log::error!("{e}");
+            return -4;
+        })?;
 
-        let command: Box<dyn Command> = match parser.parse(&command_code, &command_body) {
-            Ok(cmd) => cmd,
-            Err(error) => {
-                log::error!("{error}");
-                return Err(-4);
-            }
-        };
+        log::info!("{}", command);
 
         Ok(schedule_job_and_run(command_code, command))
     }

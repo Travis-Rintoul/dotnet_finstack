@@ -54,7 +54,7 @@ namespace FinStack.API.Controllers
         [HttpGet("test")]
         public async Task<ActionResult> Test()
         {
-            string json = "{ \"file_name\": \"test.json\" }";
+            string json = "{ \"command_name\": \"import-file\", \"file_name\": \"test.json\" }";
             return Ok(engine.ProcessJob("import-file", json));
         }
 

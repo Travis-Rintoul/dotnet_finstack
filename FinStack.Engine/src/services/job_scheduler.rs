@@ -5,19 +5,17 @@ use once_cell::sync::Lazy;
 use tokio::runtime::Runtime;
 
 use crate::{
-    JobGuid,
-    commands::CreateJobCommand,
-    db::{DbContext, RepositoryFactory},
-    services::commands_service::{Command, CommandDependencies, CommandRouter},
+    commands::CreateJobCommand, db::{DbContext, RepositoryFactory}, services::commands_service::{Command, CommandRouter, CommandDependencies}, JobGuid
 };
 
 static TOKIO_RUNTIME: Lazy<Runtime> =
     Lazy::new(|| Runtime::new().expect("Failed to create Tokio runtime"));
 
-pub fn schedule_job_and_run(command_name: String, command: Box<dyn Command>) -> JobGuid {
+pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
     let job_guid = uuid::Uuid::new_v4();
 
     TOKIO_RUNTIME.spawn(async move {
+
         let Ok(ctx) = DbContext::connect().await else {
             log::error!("Unable to connect to DB");
             return;
@@ -26,12 +24,8 @@ pub fn schedule_job_and_run(command_name: String, command: Box<dyn Command>) -> 
         let db_context = Arc::new(ctx);
         let repo_factory = RepositoryFactory::new(Arc::clone(&db_context));
 
-        let deps = Arc::new(CommandDependencies::new(
-            Arc::clone(&db_context),
-            Box::new(repo_factory),
-        ));
-        let router = CommandRouter::new(deps);
-
+        let services = Arc::new(CommandDependencies::new(db_context, Box::new(repo_factory)));
+        let runner = CommandRouter::new(Arc::clone(&services));
         let start_time = Utc::now();
         log::info!(
             "Job Started {} ({:?}) at {}",
@@ -40,7 +34,7 @@ pub fn schedule_job_and_run(command_name: String, command: Box<dyn Command>) -> 
             start_time
         );
 
-        let command_result = router.send(Box::new(command)).await;
+        let command_result = runner.send(command).await;
 
         let finish_time = Utc::now();
         let elapsed = finish_time - start_time;
@@ -70,8 +64,7 @@ pub fn schedule_job_and_run(command_name: String, command: Box<dyn Command>) -> 
             message,
         };
 
-        let result = router.send(Box::new(create_job_cmd)).await;
-
+        let result = runner.send(create_job_cmd).await;
         if result.is_err() {
             log::error!("ERROR CREATING JOB");
         }

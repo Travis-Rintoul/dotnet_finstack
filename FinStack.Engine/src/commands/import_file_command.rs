@@ -1,6 +1,8 @@
-use std::{any::Any, sync::Arc};
+use std::{any::Any, error::Error, sync::Arc};
 
-use crate::services::commands_service::{Command, CommandDependencies, CommandError, CommandHandler};
+use crate::{
+    error, services::commands_service::{CommandTrait, CommandDependencies},
+};
 use async_trait::async_trait;
 use serde::Deserialize;
 
@@ -9,22 +11,15 @@ pub struct ImportFileCommand {
     pub file_name: String,
 }
 
-impl Command for ImportFileCommand {}
-
-pub struct ImportFileCommandHandler;
-
 #[async_trait]
-impl<'a> CommandHandler<ImportFileCommand> for ImportFileCommandHandler {
-    async fn handle(
-        &self,
-        _: Arc<CommandDependencies>,
-        command: ImportFileCommand,
-    ) -> Result<Box<dyn Any + Send>, CommandError> {
-        if command.file_name == "" {
+impl CommandTrait for ImportFileCommand {
+    async fn handle(&self, _: Arc<CommandDependencies>) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if self.file_name == "" {
             return Err("file_name required".into());
         }
 
-        Ok(Box::new(()) as Box<dyn Any + Send>)
+
+        Ok(())
     }
 }
 
@@ -48,7 +43,7 @@ mod tests {
             file_name: "test_file.txt".to_string(),
         };
 
-        let result = router.send(Box::new(command)).await;
+        let result = router.send(command).await;
         assert!(result.is_ok(), "Handler should return Ok result");
     }
 
@@ -59,7 +54,7 @@ mod tests {
             file_name: "".to_string(),
         };
 
-        let result = router.send(Box::new(command)).await;
+        let result = router.send(command).await;
         assert!(result.is_err(), "Command should return Err result");
     }
 }

@@ -22,7 +22,27 @@ impl JobsRepository {
 #[allow(dead_code)]
 #[async_trait]
 impl JobsRepositoryTrait for JobsRepository {
-    async fn create(&self, _entity: JobDto) -> Result<Uuid, RepositoryError> {
+    async fn create(&self, entity: JobDto) -> Result<Uuid, RepositoryError> {
+        log::error!("JobsRepository->create");
+
+        sqlx::query(
+            r#"
+            INSERT INTO "Jobs" 
+                ("Guid", "JobType", "ElapsedMs", "Success", "StartTime", "FinishTime", "Message")
+                VALUES 
+                ($1, $2, $3, $4, $5, $6, $7)
+        "#,
+        )
+        .bind(entity.guid)
+        .bind(&entity.job_code)
+        .bind(entity.elapsed)
+        .bind(entity.success)
+        .bind(entity.start_time)
+        .bind(entity.finish_time)
+        .bind(&entity.message)
+        .execute(&self.ctx.pool)
+        .await?;
+
         Ok(Uuid::new_v4())
     }
 

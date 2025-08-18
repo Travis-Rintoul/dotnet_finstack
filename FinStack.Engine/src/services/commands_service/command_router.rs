@@ -1,18 +1,15 @@
 use crate::{
-    commands::{
-        CreateJobCommand, CreateJobCommandHandler, ImportFileCommand, ImportFileCommandHandler,
-    },
+    commands::{CreateJobCommand, ImportFileCommand},
     db::{DbContext, RepositoryFactoryTrait},
-    services::commands_service::{traits::CommandHandlerDyn, types::CommandError, CommandHandler},
 };
 use async_trait::async_trait;
+use serde::Deserialize;
 use std::{
-    any::{Any, TypeId},
-    collections::HashMap,
+    error::Error,
+    fmt::{self, Display, Formatter},
     sync::Arc,
 };
 
-#[allow(dead_code)]
 #[derive(Default)]
 pub struct CommandDependencies {
     pub db: Option<Arc<DbContext>>,
@@ -28,70 +25,58 @@ impl CommandDependencies {
     }
 }
 
-pub struct CommandHandlerAdapter<H, C> {
-    inner: H,
-    _phantom: std::marker::PhantomData<C>,
+#[derive(Debug, Deserialize)]
+#[serde(tag = "command_name")]
+pub enum Command {
+    #[serde(rename = "create-job")]
+    CreateJob(CreateJobCommand),
+    #[serde(rename = "import-file")]
+    ImportFile(ImportFileCommand),
 }
 
-impl<H, C> CommandHandlerAdapter<H, C> {
-    pub fn new(inner: H) -> Self {
-        Self {
-            inner,
-            _phantom: Default::default(),
+impl Display for Command {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            Command::CreateJob(cmd) => write!(f, "create-job: {:?}", cmd),
+            Command::ImportFile(cmd) => write!(f, "import-file: {:?}", cmd),
         }
     }
 }
 
 #[async_trait]
-impl<H, C> CommandHandlerDyn for CommandHandlerAdapter<H, C>
-where
-    H: CommandHandler<C> + Send + Sync,
-    C: Send + Sync + 'static,
-{
+impl CommandTrait for Command {
     async fn handle(
         &self,
-        dependencies: Arc<CommandDependencies>,
-        cmd: Box<dyn Any + Send>,
-    ) -> Result<Box<dyn Any + Send>, CommandError> {
-        let cmd = *cmd.downcast::<C>().expect("Command type mismatch");
-        self.inner.handle(dependencies, cmd).await?;
-        Ok(Box::new(()) as Box<dyn Any + Send>)
+        services: Arc<CommandDependencies>,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        match self {
+            Command::CreateJob(cmd) => cmd.handle(services).await,
+            Command::ImportFile(cmd) => cmd.handle(services).await,
+        }
     }
+}
+
+#[async_trait]
+pub trait CommandTrait: Send + Sync {
+    async fn handle(
+        &self,
+        services: Arc<CommandDependencies>,
+    ) -> Result<(), Box<dyn Error + Send + Sync>>;
 }
 
 pub struct CommandRouter {
-    pub dependencies: Arc<CommandDependencies>,
-    handlers: HashMap<TypeId, Arc<dyn CommandHandlerDyn>>,
+    services: Arc<CommandDependencies>,
 }
 
 impl CommandRouter {
-    pub fn new(deps: Arc<CommandDependencies>) -> Self {
-        let mut handlers: HashMap<TypeId, Arc<dyn CommandHandlerDyn>> = HashMap::new();
-
-        handlers.insert(
-            TypeId::of::<ImportFileCommand>(),
-            Arc::new(CommandHandlerAdapter::new(ImportFileCommandHandler {})),
-        );
-        handlers.insert(
-            TypeId::of::<CreateJobCommand>(),
-            Arc::new(CommandHandlerAdapter::new(CreateJobCommandHandler {})),
-        );
-
-        Self {
-            handlers,
-            dependencies: deps,
-        }
+    pub fn new(services: Arc<CommandDependencies>) -> Self {
+        Self { services }
     }
 
-    pub async fn send(&self, cmd: Box<dyn Any + Send + Sync>) -> Result<(), CommandError> {
-        let type_id = (*cmd).type_id();
-        let handler = self
-            .handlers
-            .get(&type_id)
-            .expect("Handler not found")
-            .clone();
-
-        handler.handle(Arc::clone(&self.dependencies), cmd).await?;
-        Ok(())
+    pub async fn send<C>(&self, command: C) -> Result<(), Box<dyn Error + Send + Sync>>
+    where
+        C: CommandTrait,
+    {
+        command.handle(Arc::clone(&self.services)).await
     }
 }
