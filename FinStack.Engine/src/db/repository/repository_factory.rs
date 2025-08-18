@@ -22,16 +22,20 @@ impl RepositoryFactoryTrait for RepositoryFactory {
     }
 }
 
-pub struct MockRepositoryFactory;
+pub struct MockRepositoryFactory {
+    pub mock_jobs: MockJobsRepository,
+}
 
 impl MockRepositoryFactory {
     pub fn new() -> Self {
-        Self
+        Self {
+            mock_jobs: MockJobsRepository::new()
+        }
     }
 }
 
 impl RepositoryFactoryTrait for MockRepositoryFactory {
     fn create_jobs_repository(&self) -> Box<dyn JobsRepositoryTrait> {
-        Box::new(MockJobsRepository::new())
+        Box::new(self.mock_jobs.clone())
     }
 }

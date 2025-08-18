@@ -22,3 +22,12 @@ impl<I, O> MockMethod<I, O> {
         (self.behavior.lock().unwrap())(input)
     }
 }
+
+impl<I, O> Clone for MockMethod<I, O> {
+    fn clone(&self) -> Self {
+        Self {
+            call_count: Arc::clone(&self.call_count),
+            behavior: Arc::clone(&self.behavior),
+        }
+    }
+}

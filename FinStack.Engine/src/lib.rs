@@ -1,4 +1,4 @@
-use std::{ffi::c_char, ptr::copy_nonoverlapping};
+use std::{any::Any, ffi::c_char, ptr::copy_nonoverlapping};
 
 use log::info;
 
@@ -52,8 +52,8 @@ pub unsafe extern "C" fn schedule_job(command_code_ptr: *const i8, command_body_
 
         let parser = CommandParser::new();
 
-        let command = match parser.parse(&command_code, &command_body) {
-            Ok(q) => q,
+        let command: Box<dyn Any + Send + Sync> = match parser.parse(&command_code, &command_body) {
+            Ok(cmd) => cmd,
             Err(error) => {
                 log::error!("{error}");
                 return Err(-4);

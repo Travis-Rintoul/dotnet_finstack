@@ -5,14 +5,7 @@ use once_cell::sync::Lazy;
 use tokio::runtime::Runtime;
 
 use crate::{
-    JobGuid,
-    commands::CreateJobCommand,
-    db::{DbContext, JobsRepository, JobsRepositoryTrait, RepositoryFactory},
-    models::JobDto,
-    services::{
-        command_router::{CommandDependencies, CommandRouter},
-        job_runner::JobResult,
-    },
+    commands::CreateJobCommand, db::{DbContext, RepositoryFactory}, services::command_router::{CommandDependencies, CommandRouter}, JobGuid
 };
 
 static TOKIO_RUNTIME: Lazy<Runtime> =
@@ -20,13 +13,14 @@ static TOKIO_RUNTIME: Lazy<Runtime> =
 
 pub fn schedule_job_and_run(
     command_name: String,
-    command: Box<dyn Any + Send + Sync>
+    command: Box<dyn Any + Send + Sync>,
 ) -> JobGuid {
     let job_guid = uuid::Uuid::new_v4();
 
     TOKIO_RUNTIME.spawn(async move {
         let Ok(ctx) = DbContext::connect().await else {
-            return Err("Unable to connect to DB");
+            log::error!("Unable to connect to DB");
+            return;
         };
 
         let db_context = Arc::new(ctx);
@@ -35,11 +29,9 @@ pub fn schedule_job_and_run(
         let deps = Arc::new(CommandDependencies::new(
             Arc::clone(&db_context),
             Box::new(repo_factory),
-        ))
-        ;
+        ));
         let router = CommandRouter::new(deps);
 
-        //let command_name: String = command.name();
         let start_time = Utc::now();
         log::info!(
             "Job Started {} ({:?}) at {}",
@@ -48,7 +40,7 @@ pub fn schedule_job_and_run(
             start_time
         );
 
-        let command_result = router.send(command).await;
+        let command_result = router.send(Box::new(command)).await;
 
         let finish_time = Utc::now();
         let elapsed = finish_time - start_time;
@@ -68,23 +60,21 @@ pub fn schedule_job_and_run(
             Err(e) => (false, e.to_string()),
         };
 
-        let create_job_cmd = Box::new(CreateJobCommand {
+        let create_job_cmd = CreateJobCommand {
             job_guid,
             job_code: command_name,
             elapsed: elapsed_us,
-            success: success,
+            success,
             start_time,
             finish_time,
             message,
-        });
+        };
 
-        let result = router.send(create_job_cmd).await;
+        let result = router.send(Box::new(create_job_cmd)).await;
 
         if result.is_err() {
             log::error!("ERROR CREATING JOB");
         }
-
-        Ok(())
     });
 
     JobGuid(*job_guid.as_bytes())
