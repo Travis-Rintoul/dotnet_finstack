@@ -1,8 +1,8 @@
 use std::{ffi::CStr, fs::File};
 
-use std::sync::{Arc, Mutex, Once};
-use log::{Level, LevelFilter, Metadata, Record};
+use log::LevelFilter;
 use simplelog::{CombinedLogger, Config, WriteLogger};
+use std::sync::Once;
 
 pub fn ptr_to_string(ptr: *const i8) -> Option<String> {
     if ptr.is_null() {
@@ -11,7 +11,6 @@ pub fn ptr_to_string(ptr: *const i8) -> Option<String> {
 
     unsafe { CStr::from_ptr(ptr).to_str().ok().map(|s| s.to_string()) }
 }
-
 
 static LOGGER_INIT: Once = Once::new();
 

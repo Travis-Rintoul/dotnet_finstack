@@ -6,6 +6,7 @@ use crate::{
 
 use database::DbContext;
 
+#[allow(dead_code)]
 pub async fn get_users() -> Result<Vec<UserDto>, Error> {
     let db = DbContext::connect().await?;
     let sql = r#"

@@ -1,20 +1,20 @@
-use std::{any::Any, sync::Arc};
+use std::sync::Arc;
 
 use chrono::Utc;
 use once_cell::sync::Lazy;
 use tokio::runtime::Runtime;
 
 use crate::{
-    commands::CreateJobCommand, db::{DbContext, RepositoryFactory}, services::command_router::{CommandDependencies, CommandRouter}, JobGuid
+    JobGuid,
+    commands::CreateJobCommand,
+    db::{DbContext, RepositoryFactory},
+    services::commands_service::{Command, CommandDependencies, CommandRouter},
 };
 
 static TOKIO_RUNTIME: Lazy<Runtime> =
     Lazy::new(|| Runtime::new().expect("Failed to create Tokio runtime"));
 
-pub fn schedule_job_and_run(
-    command_name: String,
-    command: Box<dyn Any + Send + Sync>,
-) -> JobGuid {
+pub fn schedule_job_and_run(command_name: String, command: Box<dyn Command>) -> JobGuid {
     let job_guid = uuid::Uuid::new_v4();
 
     TOKIO_RUNTIME.spawn(async move {

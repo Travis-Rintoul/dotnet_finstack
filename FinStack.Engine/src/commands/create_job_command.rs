@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use crate::{
     models::JobDto,
-    services::command_router::{CommandDependencies, CommandError, CommandHandler},
+    services::commands_service::{CommandDependencies, CommandError, CommandHandler},
 };
 
 #[derive(Debug)]
@@ -59,39 +59,34 @@ impl CommandHandler<CreateJobCommand> for CreateJobCommandHandler {
 
 #[cfg(test)]
 mod tests {
-    use crate::{db::MockRepositoryFactory, services::command_router::CommandRouter};
+    use crate::{db::MockRepositoryFactory, services::commands_service::CommandRouter};
 
     use super::*;
     use std::sync::Arc;
 
-    async fn setup() -> CommandRouter {
-        let dependencies = Arc::new(CommandDependencies::default());
-        CommandRouter::new(dependencies)
-    }
-
     #[tokio::test]
     async fn should_pass() {
-
         let factory = MockRepositoryFactory::new();
 
-        factory.mock_jobs.create_method.set_behavior(|q| {
-            return Ok(q.guid)
-        });
+        factory
+            .mock_jobs
+            .create_method
+            .set_behavior(|q| return Ok(q.guid));
 
         let dependencies = Arc::new(CommandDependencies {
             db: None,
-            repository_factory: Some(Box::new(factory))
+            repository_factory: Some(Box::new(factory)),
         });
 
         let router = CommandRouter::new(dependencies);
-        let command = CreateJobCommand { 
-            job_guid: Uuid::new_v4(), 
-            job_code: "import-file".to_string(), 
-            elapsed: 1, 
-            success: true, 
-            start_time: Utc::now(), 
-            finish_time: Utc::now(), 
-            message: "".to_string() 
+        let command = CreateJobCommand {
+            job_guid: Uuid::new_v4(),
+            job_code: "import-file".to_string(),
+            elapsed: 1,
+            success: true,
+            start_time: Utc::now(),
+            finish_time: Utc::now(),
+            message: "".to_string(),
         };
 
         let result = router.send(Box::new(command)).await;
@@ -100,27 +95,27 @@ mod tests {
 
     #[tokio::test]
     async fn should_fail() {
-
         let factory = MockRepositoryFactory::new();
 
-        factory.mock_jobs.create_method.set_behavior(|q| {
-            return Err("ERROR".into())
-        });
+        factory
+            .mock_jobs
+            .create_method
+            .set_behavior(|_| return Err("ERROR".into()));
 
         let dependencies = Arc::new(CommandDependencies {
             db: None,
-            repository_factory: Some(Box::new(factory))
+            repository_factory: Some(Box::new(factory)),
         });
 
         let router = CommandRouter::new(dependencies);
-        let command = CreateJobCommand { 
-            job_guid: Uuid::new_v4(), 
-            job_code: "import-file".to_string(), 
-            elapsed: 1, 
-            success: true, 
-            start_time: Utc::now(), 
-            finish_time: Utc::now(), 
-            message: "".to_string() 
+        let command = CreateJobCommand {
+            job_guid: Uuid::new_v4(),
+            job_code: "import-file".to_string(),
+            elapsed: 1,
+            success: true,
+            start_time: Utc::now(),
+            finish_time: Utc::now(),
+            message: "".to_string(),
         };
 
         let result = router.send(Box::new(command)).await;

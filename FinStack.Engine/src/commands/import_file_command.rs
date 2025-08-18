@@ -1,21 +1,25 @@
 use std::{any::Any, sync::Arc};
 
+use crate::services::commands_service::{Command, CommandDependencies, CommandError, CommandHandler};
 use async_trait::async_trait;
 use serde::Deserialize;
 
-use crate::services::command_router::{CommandDependencies, CommandError, CommandHandler};
-
 #[derive(Deserialize, Debug)]
-pub struct ImportFileCommand{
+pub struct ImportFileCommand {
     pub file_name: String,
 }
+
+impl Command for ImportFileCommand {}
 
 pub struct ImportFileCommandHandler;
 
 #[async_trait]
 impl<'a> CommandHandler<ImportFileCommand> for ImportFileCommandHandler {
-    async fn handle(&self, _: Arc<CommandDependencies>, command: ImportFileCommand) -> Result<Box<dyn Any + Send>, CommandError> {
-
+    async fn handle(
+        &self,
+        _: Arc<CommandDependencies>,
+        command: ImportFileCommand,
+    ) -> Result<Box<dyn Any + Send>, CommandError> {
         if command.file_name == "" {
             return Err("file_name required".into());
         }
@@ -26,7 +30,8 @@ impl<'a> CommandHandler<ImportFileCommand> for ImportFileCommandHandler {
 
 #[cfg(test)]
 mod tests {
-    use crate::services::command_router::CommandRouter;
+
+    use crate::services::commands_service::CommandRouter;
 
     use super::*;
     use std::sync::Arc;

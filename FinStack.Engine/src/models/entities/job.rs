@@ -2,8 +2,7 @@ use chrono::{DateTime, Utc};
 use sqlx::{Encode, FromRow};
 use uuid::Uuid;
 
-use crate::db::Entity;
-
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Job {
     pub id: i32,
@@ -15,8 +14,6 @@ pub struct Job {
     pub finish_time: DateTime<Utc>,
     pub message: String,
 }
-
-impl Entity for Job {}
 
 #[derive(Debug, Encode, FromRow)]
 pub struct JobDto {

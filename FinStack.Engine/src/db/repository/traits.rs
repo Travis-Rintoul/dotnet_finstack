@@ -5,6 +5,7 @@ use crate::models::JobDto;
 
 pub type RepositoryError = Box<dyn std::error::Error + Send + Sync>;
 
+#[allow(dead_code)]
 #[async_trait]
 pub trait JobsRepositoryTrait: Send + Sync  {
     async fn create(&self, entity: JobDto) -> Result<Uuid, RepositoryError>;
