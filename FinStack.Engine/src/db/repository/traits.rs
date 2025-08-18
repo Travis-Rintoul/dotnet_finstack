@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use uuid::Uuid;
 
-use crate::models::JobDto;
+use crate::models::{JobDto, UserDto};
 
 pub type RepositoryError = Box<dyn std::error::Error + Send + Sync>;
 
@@ -13,4 +13,11 @@ pub trait JobsRepositoryTrait: Send + Sync  {
     async fn find_all(&self) -> Vec<JobDto>;
     async fn update(&self, entity: JobDto) -> Result<Uuid, RepositoryError>;
     async fn remove(&self, entity: JobDto) -> Result<(), RepositoryError>;
+}
+
+#[allow(dead_code)]
+#[async_trait]
+pub trait UsersRepositoryTrait: Send + Sync  {
+    async fn find_by_id(&self, id: u32) -> Option<UserDto>;
+    async fn find_all(&self) -> Vec<UserDto>;
 }

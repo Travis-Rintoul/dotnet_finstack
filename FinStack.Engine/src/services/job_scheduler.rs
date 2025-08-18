@@ -5,7 +5,7 @@ use once_cell::sync::Lazy;
 use tokio::runtime::Runtime;
 
 use crate::{
-    commands::CreateJobCommand, db::{DbContext, RepositoryFactory}, services::commands_service::{Command, CommandRouter, CommandDependencies}, JobGuid
+    commands::CreateJobCommand, db::{DbContext, RepositoryFactory}, models::UserDto, queries::{GetUserByIdQuery, GetUsersQuery}, services::{commands_service::{Command, CommandDependencies, CommandRouter}, query_service::QueryRouter}, JobGuid
 };
 
 static TOKIO_RUNTIME: Lazy<Runtime> =
@@ -25,7 +25,9 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
         let repo_factory = RepositoryFactory::new(Arc::clone(&db_context));
 
         let services = Arc::new(CommandDependencies::new(db_context, Box::new(repo_factory)));
-        let runner = CommandRouter::new(Arc::clone(&services));
+        let query_runner = QueryRouter::new(Arc::clone(&services));
+        let command_runner = CommandRouter::new(Arc::clone(&services));
+
         let start_time = Utc::now();
         log::info!(
             "Job Started {} ({:?}) at {}",
@@ -34,7 +36,7 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
             start_time
         );
 
-        let command_result = runner.send(command).await;
+        let command_result = command_runner.send(command).await;
 
         let finish_time = Utc::now();
         let elapsed = finish_time - start_time;
@@ -46,6 +48,18 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
             finish_time,
             elapsed
         );
+
+        let get_user_query = GetUsersQuery;
+
+        let user_result: Result<Vec<UserDto>, _> = query_runner.send(get_user_query).await;
+        match user_result {
+            Ok(users) => {
+                println!("Found user: {:?}", users);
+            }
+            Err(e) => {
+                eprintln!("Query failed: {}", e);
+            }
+}
 
         let elapsed_us: i64 = elapsed.num_microseconds().unwrap_or(0);
 
@@ -64,7 +78,7 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
             message,
         };
 
-        let result = runner.send(create_job_cmd).await;
+        let result = command_runner.send(create_job_cmd).await;
         if result.is_err() {
             log::error!("ERROR CREATING JOB");
         }

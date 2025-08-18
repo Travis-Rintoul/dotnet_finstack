@@ -1,8 +1,7 @@
 use serde_json::from_str;
 
 use crate::{
-    services::{commands_service::Command, job_scheduler::schedule_job_and_run},
-    utils::{ptr_to_string, setup_logger},
+    models::UserDto, services::{commands_service::Command, job_scheduler::schedule_job_and_run}, utils::{ptr_to_string, setup_logger}
 };
 mod commands;
 mod config;
@@ -10,6 +9,7 @@ mod db;
 mod error;
 mod jobs;
 mod models;
+mod queries;
 mod services;
 mod utils;
 

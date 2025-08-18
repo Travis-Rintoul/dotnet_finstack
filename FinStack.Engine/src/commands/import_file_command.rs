@@ -1,8 +1,6 @@
-use std::{any::Any, error::Error, sync::Arc};
+use std::{error::Error, sync::Arc};
 
-use crate::{
-    error, services::commands_service::{CommandTrait, CommandDependencies},
-};
+use crate::services::commands_service::{CommandDependencies, CommandTrait};
 use async_trait::async_trait;
 use serde::Deserialize;
 
@@ -13,11 +11,13 @@ pub struct ImportFileCommand {
 
 #[async_trait]
 impl CommandTrait for ImportFileCommand {
-    async fn handle(&self, _: Arc<CommandDependencies>) -> Result<(), Box<dyn Error + Send + Sync>> {
+    async fn handle(
+        &self,
+        _: Arc<CommandDependencies>,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
         if self.file_name == "" {
             return Err("file_name required".into());
         }
-
 
         Ok(())
     }
