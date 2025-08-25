@@ -12,29 +12,29 @@ namespace FinStack.Infrastructure.Repositories
     {
         public async Task<Option<User>> GetByIdAsync(Guid userGuid)
         {
-            return new Option<User>(await context.Users.SingleOrDefaultAsync(u => u.UserGuid == userGuid));
+            return new Option<User>(await context.AppUsers.SingleOrDefaultAsync(u => u.UserGuid == userGuid));
         }
 
         public async Task<IEnumerable<User>> GetUsersAsync()
-            => await context.Users.ToListAsync();
+            => await context.AppUsers.ToListAsync();
 
         public async Task<Result<Guid>> AddAsync(User user)
         {
-            context.Users.Add(user);
+            await context.AppUsers.AddAsync(user);
             await context.SaveChangesAsync();
             return Success(user.UserGuid);
         }
 
         public async Task<Result<Guid>> UpdateAsync(User user)
         {
-            context.Users.Update(user);
+            context.AppUsers.Update(user);
             await context.SaveChangesAsync();
             return Success(user.UserGuid);
         }
 
         public async Task<Result<Unit>> DeleteAysnc(User user)
         {
-            context.Remove(user);
+            context.AppUsers.Remove(user);
             await context.SaveChangesAsync();
             return Success(new Unit());
         }
