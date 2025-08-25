@@ -6,10 +6,13 @@ public readonly struct Option<T>
     public bool IsSome { get; }
     public bool IsNone => !IsSome;
     
-    public Option(T value)
+    public Option(T? value)
     {
-        _value = value;
-        IsSome = true;
+        IsSome = value != null;
+        if (value != null)
+        {
+            _value = value;
+        }
     }
 
     public static Option<T> Some(T value)
