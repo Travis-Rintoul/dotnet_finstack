@@ -1,6 +1,7 @@
 
 using FinStack.Common;
 using FinStack.Domain.Entities;
+using MediatR;
 
 namespace FinStack.Domain.Repositories
 {
@@ -10,5 +11,6 @@ namespace FinStack.Domain.Repositories
         Task<IEnumerable<User>> GetUsersAsync();
         Task<Result<Guid>> AddAsync(User user);
         Task<Result<Guid>> UpdateAsync(User user);
+        Task<Result<Unit>> DeleteAysnc(User user);
     }
 }
