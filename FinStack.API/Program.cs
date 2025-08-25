@@ -8,20 +8,19 @@ using MediatR;
 using FinStack.Domain.Repositories;
 using FinStack.Infrastructure.Repositories;
 using FinStack.Application.Queries;
-using FinStack.Infrastructure.Commands;
-using FinStack.Infrastructure.Entities;
 using FinStack.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Mvc;
+using FinStack.Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("default")));
 
-builder.Services.AddIdentity<AuthUser, IdentityRole>()
+builder.Services.AddIdentity<AuthUser, AuthRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
@@ -78,10 +77,16 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
 
 builder.Services.AddMediatR(typeof(Program).Assembly);
-builder.Services.AddMediatR(typeof(GetUsersQueryHandler).Assembly);
+builder.Services.AddMediatR(typeof(GetUserByIdQuery).Assembly);
+builder.Services.AddMediatR(typeof(GetAuthUserByIdQuery).Assembly);
 builder.Services.AddMediatR(typeof(CreateUserCommand).Assembly);
 builder.Services.AddMediatR(typeof(CreateAuthUserCommand).Assembly);
+builder.Services.AddMediatR(typeof(CreateUpdateUserPreferenceCommand).Assembly);
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
+builder.Services.AddScoped<IAuthUserRepository, AuthUserRepository>();
+
 
 var app = builder.Build();
 app.UseAuthentication();

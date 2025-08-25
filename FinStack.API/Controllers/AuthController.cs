@@ -13,15 +13,19 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         return (await authService.RegisterAsync(dto)).Match<IActionResult>(
             guid => Ok(guid),
-            BadRequest
+            errors => BadRequest(new ResponseMeta
+            {
+                Code = 400,
+                Message = "There was an error register...",
+                Errors = errors
+            })
         );
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        var token = await authService.LoginAsync(dto.Email, dto.Password);
-        return token.Match<IActionResult>(
+        return (await authService.LoginAsync(dto.Email, dto.Password)).Match<IActionResult>(
             Ok,
             BadRequest
         );

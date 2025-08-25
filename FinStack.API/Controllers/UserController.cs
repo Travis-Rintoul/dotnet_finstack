@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FinStack.Application.Queries;
 using FinStack.Application.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using FinStack.Application.Commands;
 
 namespace FinStack.API.Controllers
 {
@@ -23,11 +24,12 @@ namespace FinStack.API.Controllers
 
         // GET: api/user/{id}
         [HttpGet("{id}")]
-        public ActionResult<string> GetUser(int id)
+        public async Task<ActionResult<string>> GetUser(Guid guid)
         {
-            return Ok($"user{id}");
+            return Ok(await mediator.Send(new GetUserByIdQuery(guid)));
         }
 
+        // TODO: look at if these are needed, register might do the job
         // POST: api/user
         [HttpPost]
         public ActionResult<string> CreateUser([FromBody] string user)
@@ -35,18 +37,62 @@ namespace FinStack.API.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = 1 }, user);
         }
 
-        // PUT: api/user/{id}
-        [HttpPut("{id}")]
-        public IActionResult UpdateUser(int id, [FromBody] string user)
+        // PUT: api/user/{guid}
+        [HttpPut("{guid}")]
+        public async Task<IActionResult> UpdateUser(Guid userGuid, [FromBody] UpdateUserDto dto)
         {
-            return NoContent();
+            var result = await mediator.Send(new UpdateUserCommand(userGuid, dto));
+            return result.Match<IActionResult>(
+                guid => Ok(guid),
+                (errors) => BadRequest(new ResponseMeta
+                {
+                    Code = 400,
+                    Message = "Validation Failed",
+                    Errors = errors.Where(e => e.Severity == ErrorSeverity.Error),
+                    Warnings = errors.Where(e => e.Severity == ErrorSeverity.Warning),
+                })
+            );
         }
 
         // DELETE: api/user/{id}
-        [HttpDelete("{id}")]
-        public IActionResult DeleteUser(int id)
+        [HttpDelete("{guid}")]
+        public async Task<IActionResult> DeleteUser(Guid guid)
         {
-            return NoContent();
+            var result = await mediator.Send(new DeleteUserCommand(guid));
+            return result.Match<IActionResult>(
+                guid => Ok(guid),
+                (errors) => BadRequest(new ResponseMeta
+                {
+                    Code = 400,
+                    Message = "Error:",
+                    Errors = errors.Where(e => e.Severity == ErrorSeverity.Error),
+                    Warnings = errors.Where(e => e.Severity == ErrorSeverity.Warning),
+                })
+            );
+        }
+
+        // GET: api/user/{UserGUID}/preferences
+        [HttpGet("{guid}/preferences")]
+        public ActionResult<string> GetUserPreferences(Guid guid)
+        {
+            return Ok($"GetUserPreferences");
+        }
+
+        // PUT: api/user/preferences
+        [HttpPut("{guid}/preferences")]
+        public async Task<IActionResult> UpdateUserPreferences(Guid userGuid, [FromBody] CreateUpdateUserPreferenceDto dto)
+        {
+            var result = await mediator.Send(new CreateUpdateUserPreferenceCommand(userGuid, dto));
+            return result.Match<IActionResult>(
+                _ => Ok(),
+                (errors) => BadRequest(new ResponseMeta
+                {
+                    Code = 400,
+                    Message = "ERROR: ",
+                    Errors = errors.Where(e => e.Severity == ErrorSeverity.Error),
+                    Warnings = errors.Where(e => e.Severity == ErrorSeverity.Warning),
+                })
+            );
         }
 
         // TODO: remove debug call to engine
@@ -57,6 +103,5 @@ namespace FinStack.API.Controllers
             string json = "{ \"command_name\": \"import-file\", \"file_name\": \"test.json\" }";
             return Ok(engine.ProcessJob("import-file", json));
         }
-
     }
 }
