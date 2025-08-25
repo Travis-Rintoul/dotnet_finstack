@@ -14,12 +14,13 @@ public class CreateUserCommandHandler(IUserRepository repo) : IRequestHandler<Cr
 {
     public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
+        var dto = request.userDto;
         var user = new User
         {
-            UserGuid = Guid.NewGuid(),
-            FirstName = request.userDto.FirstName,
-            MiddleName = request.userDto.MiddleName,
-            LastName = request.userDto.LastName,
+            UserGuid = dto.UserGuid,
+            FirstName = dto.FirstName,
+            MiddleName = dto.MiddleName,
+            LastName = dto.LastName,
             CreatedDate = DateTime.UtcNow
         };
         
