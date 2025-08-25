@@ -34,6 +34,7 @@ pub struct MockRepositoryFactory {
     pub mock_users: MockUserRepository
 }
 
+#[allow(dead_code)]
 impl MockRepositoryFactory {
     pub fn new() -> Self {
         Self {

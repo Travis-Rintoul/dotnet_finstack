@@ -4,7 +4,9 @@ use serde::Deserialize;
 use std::{error::Error, sync::Arc};
 use uuid::Uuid;
 
-use crate::{models::JobDto, services::commands_service::{CommandDependencies, CommandTrait}};
+use crate::{
+    models::JobDto, services::command_and_query_service::{traits::CommandTrait, CQRSDependencies},
+};
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct CreateJobCommand {
@@ -19,7 +21,10 @@ pub struct CreateJobCommand {
 
 #[async_trait]
 impl CommandTrait for CreateJobCommand {
-    async fn handle(&self, services: Arc<CommandDependencies>) -> Result<(), Box<dyn Error + Send + Sync>> {
+    async fn handle(
+        &self,
+        services: Arc<CQRSDependencies>,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
         let Some(repo_factory) = &services.repository_factory else {
             log::error!("Unable to initialize repository");
             return Err("".into());
@@ -48,7 +53,8 @@ impl CommandTrait for CreateJobCommand {
 
 #[cfg(test)]
 mod tests {
-    use crate::{db::MockRepositoryFactory, services::commands_service::CommandRouter};
+
+    use crate::{db::MockRepositoryFactory, services::command_and_query_service::CQRSDispatcher};
 
     use super::*;
     use std::sync::Arc;
@@ -62,12 +68,12 @@ mod tests {
             .create_method
             .set_behavior(|q| return Ok(q.guid));
 
-        let dependencies = Arc::new(CommandDependencies {
+        let dependencies = Arc::new(CQRSDependencies {
             db: None,
             repository_factory: Some(Box::new(factory)),
         });
 
-        let router = CommandRouter::new(dependencies);
+        let dispatcher = CQRSDispatcher::new(dependencies);
         let command = CreateJobCommand {
             job_guid: Uuid::new_v4(),
             job_code: "import-file".to_string(),
@@ -78,7 +84,7 @@ mod tests {
             message: "".to_string(),
         };
 
-        let result = router.send(command).await;
+        let result = dispatcher.send_command(command).await;
         assert!(result.is_ok(), "Handler should return Ok result");
     }
 
@@ -91,12 +97,12 @@ mod tests {
             .create_method
             .set_behavior(|_| return Err("ERROR".into()));
 
-        let dependencies = Arc::new(CommandDependencies {
+        let dependencies = Arc::new(CQRSDependencies {
             db: None,
             repository_factory: Some(Box::new(factory)),
         });
 
-        let router = CommandRouter::new(dependencies);
+        let dispatcher = CQRSDispatcher::new(dependencies);
         let command = CreateJobCommand {
             job_guid: Uuid::new_v4(),
             job_code: "import-file".to_string(),
@@ -107,8 +113,7 @@ mod tests {
             message: "".to_string(),
         };
 
-        let result = router.send(command).await;
+        let result = dispatcher.send_command(command).await;
         assert!(result.is_err(), "Handler should return Err result");
     }
 }
-

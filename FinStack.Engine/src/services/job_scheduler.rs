@@ -5,7 +5,13 @@ use once_cell::sync::Lazy;
 use tokio::runtime::Runtime;
 
 use crate::{
-    commands::CreateJobCommand, db::{DbContext, RepositoryFactory}, models::UserDto, queries::{GetUserByIdQuery, GetUsersQuery}, services::{commands_service::{Command, CommandDependencies, CommandRouter}, query_service::QueryRouter}, JobGuid
+    JobGuid,
+    db::{DbContext, RepositoryFactory},
+    models::UserDto,
+    services::command_and_query_service::{
+        CQRSDependencies, CQRSDispatcher, Command, commands::CreateJobCommand,
+        queries::GetUsersQuery,
+    },
 };
 
 static TOKIO_RUNTIME: Lazy<Runtime> =
@@ -15,7 +21,6 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
     let job_guid = uuid::Uuid::new_v4();
 
     TOKIO_RUNTIME.spawn(async move {
-
         let Ok(ctx) = DbContext::connect().await else {
             log::error!("Unable to connect to DB");
             return;
@@ -24,9 +29,9 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
         let db_context = Arc::new(ctx);
         let repo_factory = RepositoryFactory::new(Arc::clone(&db_context));
 
-        let services = Arc::new(CommandDependencies::new(db_context, Box::new(repo_factory)));
-        let query_runner = QueryRouter::new(Arc::clone(&services));
-        let command_runner = CommandRouter::new(Arc::clone(&services));
+        let services = Arc::new(CQRSDependencies::new(db_context, Box::new(repo_factory)));
+
+        let dispatcher = CQRSDispatcher::new(services);
 
         let start_time = Utc::now();
         log::info!(
@@ -36,7 +41,7 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
             start_time
         );
 
-        let command_result = command_runner.send(command).await;
+        let command_result = dispatcher.send_command(command).await;
 
         let finish_time = Utc::now();
         let elapsed = finish_time - start_time;
@@ -51,7 +56,7 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
 
         let get_user_query = GetUsersQuery;
 
-        let user_result: Result<Vec<UserDto>, _> = query_runner.send(get_user_query).await;
+        let user_result: Result<Vec<UserDto>, _> = dispatcher.send_query(get_user_query).await;
         match user_result {
             Ok(users) => {
                 println!("Found user: {:?}", users);
@@ -59,7 +64,7 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
             Err(e) => {
                 eprintln!("Query failed: {}", e);
             }
-}
+        }
 
         let elapsed_us: i64 = elapsed.num_microseconds().unwrap_or(0);
 
@@ -78,7 +83,7 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
             message,
         };
 
-        let result = command_runner.send(create_job_cmd).await;
+        let result = dispatcher.send_command(create_job_cmd).await;
         if result.is_err() {
             log::error!("ERROR CREATING JOB");
         }

@@ -13,6 +13,7 @@ impl<I, O> MockMethod<I, O> {
         }
     }
 
+    #[allow(dead_code)]
     pub fn set_behavior(&self, f: impl Fn(I) -> O + Send + Sync + 'static) {
         *self.behavior.lock().unwrap() = Box::new(f);
     }

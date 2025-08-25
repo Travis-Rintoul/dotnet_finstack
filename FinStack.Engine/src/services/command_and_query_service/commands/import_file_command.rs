@@ -1,8 +1,9 @@
 use std::{error::Error, sync::Arc};
 
-use crate::services::commands_service::{CommandDependencies, CommandTrait};
 use async_trait::async_trait;
 use serde::Deserialize;
+
+use crate::services::command_and_query_service::{traits::CommandTrait, CQRSDependencies};
 
 #[derive(Deserialize, Debug)]
 pub struct ImportFileCommand {
@@ -13,7 +14,7 @@ pub struct ImportFileCommand {
 impl CommandTrait for ImportFileCommand {
     async fn handle(
         &self,
-        _: Arc<CommandDependencies>,
+        _: Arc<CQRSDependencies>,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
         if self.file_name == "" {
             return Err("file_name required".into());
@@ -26,35 +27,35 @@ impl CommandTrait for ImportFileCommand {
 #[cfg(test)]
 mod tests {
 
-    use crate::services::commands_service::CommandRouter;
+    use crate::services::command_and_query_service::CQRSDispatcher;
 
     use super::*;
     use std::sync::Arc;
 
-    async fn setup() -> CommandRouter {
-        let dependencies = Arc::new(CommandDependencies::default());
-        CommandRouter::new(dependencies)
+    async fn setup() -> CQRSDispatcher {
+        let dependencies: Arc<_> = Arc::new(CQRSDependencies::default());
+        CQRSDispatcher::new(dependencies)
     }
 
     #[tokio::test]
     async fn should_pass() {
-        let router = setup().await;
+        let dispatcher = setup().await;
         let command = ImportFileCommand {
             file_name: "test_file.txt".to_string(),
         };
 
-        let result = router.send(command).await;
+        let result = dispatcher.send_command(command).await;
         assert!(result.is_ok(), "Handler should return Ok result");
     }
 
     #[tokio::test]
     async fn should_fail_when_no_file_provided() {
-        let router = setup().await;
+        let dispatcher = setup().await;
         let command = ImportFileCommand {
             file_name: "".to_string(),
         };
 
-        let result = router.send(command).await;
+        let result = dispatcher.send_command(command).await;
         assert!(result.is_err(), "Command should return Err result");
     }
 }

@@ -2,10 +2,12 @@ use async_trait::async_trait;
 use uuid::Uuid;
 
 use crate::{
-    db::{repository::mock::MockMethod, JobsRepositoryTrait, RepositoryError, UsersRepositoryTrait},
+    db::{repository::mock::MockMethod, RepositoryError, UsersRepositoryTrait},
     models::UserDto,
 };
 
+
+#[allow(dead_code)]
 #[derive(Clone)]
 pub struct MockUserRepository {
     pub create_method: MockMethod<UserDto, Result<Uuid, RepositoryError>>,
@@ -15,6 +17,7 @@ pub struct MockUserRepository {
     pub find_all_method: MockMethod<(), Vec<UserDto>>,
 }
 
+#[allow(dead_code)]
 impl MockUserRepository {
     pub fn new() -> Self {
         Self::default()

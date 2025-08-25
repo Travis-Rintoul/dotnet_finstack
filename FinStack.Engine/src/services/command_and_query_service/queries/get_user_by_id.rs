@@ -1,15 +1,12 @@
 use std::error::Error;
-
 use async_trait::async_trait;
-use uuid::Uuid;
 
 use crate::{
     models::UserDto,
-    services::{commands_service::CommandDependencies, query_service::QueryTrait},
+    services::command_and_query_service::{CQRSDependencies, traits::QueryTrait},
 };
 
-pub struct GetUserByIdQuery {
-}
+pub struct GetUserByIdQuery;
 
 #[async_trait]
 impl QueryTrait for GetUserByIdQuery {
@@ -17,9 +14,8 @@ impl QueryTrait for GetUserByIdQuery {
 
     async fn execute(
         &self,
-        services: &CommandDependencies,
+        _services: &CQRSDependencies,
     ) -> Result<Self::Response, Box<dyn Error + Send + Sync>> {
-
         Ok(None)
     }
 }

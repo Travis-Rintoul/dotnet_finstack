@@ -1,3 +1,2 @@
-pub mod commands_service;
 pub mod job_scheduler;
-pub mod query_service;
+pub mod command_and_query_service;

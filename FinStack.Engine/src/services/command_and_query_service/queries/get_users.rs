@@ -1,11 +1,10 @@
-use std::error::Error;
-
-use async_trait::async_trait;
-
 use crate::{
     models::UserDto,
-    services::{commands_service::CommandDependencies, query_service::QueryTrait},
+    services::command_and_query_service::{CQRSDependencies, traits::QueryTrait},
 };
+use async_trait::async_trait;
+use std::error::Error;
+
 pub struct GetUsersQuery;
 
 #[async_trait]
@@ -14,7 +13,7 @@ impl QueryTrait for GetUsersQuery {
 
     async fn execute(
         &self,
-        services: &CommandDependencies,
+        services: &CQRSDependencies,
     ) -> Result<Self::Response, Box<dyn Error + Send + Sync>> {
         let Some(repo_factory) = &services.repository_factory else {
             log::error!("Unable to initialize repository");
