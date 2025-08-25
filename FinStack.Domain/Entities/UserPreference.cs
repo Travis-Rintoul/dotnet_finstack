@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using FinStack.Domain.Entities;
 
-public class UserPreferences
+public class UserPreference
 {
     public int Id { get; set; }
     public int UserId { get; set; }
