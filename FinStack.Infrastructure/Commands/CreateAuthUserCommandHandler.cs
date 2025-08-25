@@ -26,7 +26,7 @@ public class CreateUserCommandHandler(UserManager<AuthUser> userManager) : IRequ
         var result = await userManager.CreateAsync(user,  dto.Password);
         if (!result.Succeeded)
         {
-            return Failure<Guid>(result.Errors.Select(e => new Exception(e.Code)));
+            return Failure<Guid>(result.Errors);
         }
         
         return Success(dto.Id);

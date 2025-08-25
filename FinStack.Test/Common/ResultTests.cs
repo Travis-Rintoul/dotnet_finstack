@@ -22,7 +22,7 @@ public class ResultTests
     [Fact]
     public void Failure_FromString_CreatesFailureResult()
     {
-        var result = Result.Failure<string>("Something went wrong");
+        var result = Result.Failure<string>(new Error("ERROR", "Something went wrong"));
 
         Assert.False(result.IsSuccess);
         Assert.Single(result.Errors);
@@ -32,7 +32,7 @@ public class ResultTests
     [Fact]
     public void Failure_FromException_CreatesFailureResult()
     {
-        var ex = new InvalidOperationException("Invalid");
+        var ex = new Error("Invalid");
         var result = Result.Failure<string>(ex);
 
         Assert.False(result.IsSuccess);
@@ -43,10 +43,10 @@ public class ResultTests
     [Fact]
     public void Failure_FromMultipleExceptions_CreatesFailureResult()
     {
-        var errors = new List<Exception>
+        var errors = new List<Error>
         {
-            new Exception("Error1"),
-            new Exception("Error2")
+            new Error("Error1"),
+            new Error("Error2")
         };
 
         var result = Result.Failure<string>(errors);
@@ -69,7 +69,7 @@ public class ResultTests
     [Fact]
     public void Failed_ReturnsTrue_AndOutsErrors()
     {
-        var result = Result.Failure<int>("Bad input");
+        var result = Result.Failure<int>(new Error("Bad input"));
 
         var failed = result.Failed(out var errors);
 
@@ -94,11 +94,11 @@ public class ResultTests
     [Fact]
     public void Match_HandlesFailure()
     {
-        var result = Result.Failure<string>("Failed");
+        var result = Result.Failure<string>(new Error("Failed"));
 
         var outcome = result.Match(
             onSuccess: val => $"Success: {val}",
-            onFailure: errors => $"Failure: {string.Join(",", errors.Select(e => e.Message))}"
+            onFailure: errors => $"Failure: {string.Join(",", errors.Select(e => e.Code))}"
         );
 
         Assert.Equal("Failure: Failed", outcome);

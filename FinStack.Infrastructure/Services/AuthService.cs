@@ -69,9 +69,6 @@ public class AuthService(
         var userDto = new UserDto()
         {
             Email = dto.Email,
-            FirstName = dto.FirstName,
-            MiddleName = dto.MiddleName,
-            LastName = dto.LastName,
         };
 
         var userResult = await mediator.Send(new CreateUserCommand(userDto));
@@ -103,7 +100,7 @@ public class AuthService(
         var user = await userManager.FindByEmailAsync(userDto.Email);
         if (user == null)
         {
-            return Failure<Guid>("User not found.");
+            return Failure<Guid>(Error.UserNotFound(userDto.Id));
         }
 
         if (userDto.UserType != user.UserType)
@@ -123,21 +120,27 @@ public class AuthService(
     private Result<string> GenerateJwtToken(AuthUserDto user)
     {
         var jwtKey = configuration["Jwt:Key"];
-        if (String.IsNullOrWhiteSpace(jwtKey))
+        var errors = new List<Error>();
+        if (string.IsNullOrWhiteSpace(jwtKey))
         {
-            return Failure<string>("Signing key is missing in configuration.");
+            errors.Add(new Error("JWT_KEY_MISSING", "Signing key is missing in configuration."));
         }
         
         var issuer = configuration["JWT:ValidIssuer"];
-        if (String.IsNullOrWhiteSpace(issuer))
+        if (string.IsNullOrWhiteSpace(issuer))
         {
-            return Failure<string>("Signing issuer is missing in configuration.");
+            errors.Add(new Error("JWT_ISSUER_MISSING", "Signing issuer is missing in configuration."));
         }
         
         var audience = configuration["JWT:ValidAudience"];
-        if (String.IsNullOrWhiteSpace(audience))
+        if (string.IsNullOrWhiteSpace(audience))
         {
-            return Failure<string>("Signing audience is missing in configuration.");
+            errors.Add(new Error("JWT_AUDIENCE_MISSING", "Signing audience is missing in configuration."));
+        }
+
+        if (errors.Any())
+        {
+            return Failure<string>(errors);
         }
         
         var claims = new[]
