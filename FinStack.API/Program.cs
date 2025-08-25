@@ -14,6 +14,7 @@ using FinStack.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,7 +51,32 @@ builder.Services.AddAuthentication(options =>
         }
     );
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<BadRequestMappingFilter>();
+});
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(ms => ms.Value.Errors.Count > 0)
+            .Select(ms => new Error(ms.Key, ms.Value.Errors.First().ErrorMessage))
+            .ToList();
+
+        var response = new ResponseMeta
+        {
+            Code = StatusCodes.Status400BadRequest,
+            Message = "ERROR",
+            Errors = errors
+        };
+
+        return new BadRequestObjectResult(response);
+    };
+});
+
+
 builder.Services.AddMediatR(typeof(Program).Assembly);
 builder.Services.AddMediatR(typeof(GetUsersQueryHandler).Assembly);
 builder.Services.AddMediatR(typeof(CreateUserCommand).Assembly);
