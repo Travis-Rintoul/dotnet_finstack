@@ -17,16 +17,8 @@ namespace FinStack.Infrastructure.EntityConfigurations
                      builder.Property(u => u.Id)
                             .ValueGeneratedOnAdd();
 
-                     builder.Property(u => u.Email)
-                            .IsRequired()
-                            .HasMaxLength(255);
-
                      builder.Property(u => u.CreatedDate)
                             .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                     // Unique constraints (optional)
-                     builder.HasIndex(u => u.Email)
-                            .IsUnique();
               }
        }
 }

@@ -19,14 +19,14 @@ namespace FinStack.Infrastructure.Repositories
         {
             context.Users.Add(user);
             await context.SaveChangesAsync();
-            return Success(user.Guid);
+            return Success(user.UserGuid);
         }
 
         public async Task<Result<Guid>> UpdateAsync(User user)
         {
             context.Users.Update(user);
             await context.SaveChangesAsync();
-            return Success(user.Guid);
+            return Success(user.UserGuid);
         }
     }
 }

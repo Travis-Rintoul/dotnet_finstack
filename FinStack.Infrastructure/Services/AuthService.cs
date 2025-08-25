@@ -69,7 +69,9 @@ public class AuthService(
         var userDto = new UserDto()
         {
             Email = dto.Email,
-            UserName = dto.Email,
+            FirstName = dto.FirstName,
+            MiddleName = dto.MiddleName,
+            LastName = dto.LastName,
         };
 
         var userResult = await mediator.Send(new CreateUserCommand(userDto));
@@ -84,7 +86,7 @@ public class AuthService(
             Id = userGuid,
             Email = dto.Email,
             Password = dto.Password,
-            Type = UserType.User,
+            UserType = UserType.Individual,
         };
         
         var authUserResult = await mediator.Send(new CreateAuthUserCommand(authUserDto));
@@ -104,9 +106,9 @@ public class AuthService(
             return Failure<Guid>("User not found.");
         }
 
-        if (userDto.Type != user.Type)
+        if (userDto.UserType != user.UserType)
         {
-            user.Type = userDto.Type;
+            user.UserType = userDto.UserType;
         }
         
         var updateResult = await userManager.UpdateAsync(user);

@@ -21,7 +21,7 @@ namespace FinStack.Application.Queries
             var userOption = await _repo.GetByIdAsync(request.UserId);
 
             return userOption.Match(
-                user => new UserDto(user.Guid, user.Email),
+                user => new UserDto { UserGuid = user.UserGuid },
                 () => Option<UserDto>.None()
             );
         }

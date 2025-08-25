@@ -20,7 +20,7 @@ public class CreateUserCommandHandler(UserManager<AuthUser> userManager) : IRequ
             Id = request.authUserDto.Id.ToString(),
             Email = dto.Email,
             UserName = dto.Email,
-            Type = dto.Type,
+            UserType = dto.UserType,
         };
         
         var result = await userManager.CreateAsync(user,  dto.Password);

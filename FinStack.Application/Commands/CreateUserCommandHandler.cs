@@ -16,14 +16,14 @@ public class CreateUserCommandHandler(IUserRepository repo) : IRequestHandler<Cr
     {
         var user = new User
         {
-            Guid = Guid.NewGuid(),
-            Email = request.userDto.Email,
-            Name = request.userDto.Email,
+            UserGuid = Guid.NewGuid(),
+            FirstName = request.userDto.FirstName,
+            MiddleName = request.userDto.MiddleName,
+            LastName = request.userDto.LastName,
             CreatedDate = DateTime.UtcNow
         };
         
         var result = await repo.AddAsync(user);
-        
         
         return result.Match(
             guid => Success(guid),

@@ -4,6 +4,7 @@ namespace FinStack.Domain.Enums;
 
 public enum UserType
 {
-    User,
-    Admin
+    Individual,
+    Institutional,
+    Demo
 }

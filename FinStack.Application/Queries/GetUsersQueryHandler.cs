@@ -23,7 +23,7 @@ namespace FinStack.Application.Queries
         public async Task<IEnumerable<UserDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
             var users = await _repo.GetUsersAsync();
-            return users.Select(u => new UserDto(u.Guid, u.Email));
+            return users.Select(u => new UserDto { UserGuid = u.UserGuid });
         }
     }
 }

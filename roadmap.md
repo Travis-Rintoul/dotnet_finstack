@@ -22,6 +22,7 @@
 - [x] Basic trade engine function via FFI (e.g., `place_order`, `cancel_order`)  
 - [ ] Order validation logic (limits, balances)  
 - [ ] Portfolio tracking (in-memory for now)
+- [x] Testing framework layed out
 
 ### 🌐 API Development
 - [ ] Define and expose REST endpoints:
