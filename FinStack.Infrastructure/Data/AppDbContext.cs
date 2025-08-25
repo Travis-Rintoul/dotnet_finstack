@@ -11,4 +11,5 @@ public class AppDbContext : IdentityDbContext<AuthUser>
 
     public DbSet<User> Users { get; set; }
     public DbSet<Job> Jobs { get; set; }
+    public DbSet<UserPreference> UserPreferences { get; set; }
 }
