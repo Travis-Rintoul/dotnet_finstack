@@ -1,16 +1,21 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinStack.Domain.Entities
 {
     public class User
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Required]
+        [Key]
         public Guid UserGuid { get; set; }
         
         [Required]
         public string FirstName { get; set; } = string.Empty;
+
+        
         public string MiddleName { get; set; } = string.Empty;
 
         [Required]
@@ -21,7 +26,9 @@ namespace FinStack.Domain.Entities
 
         [Required]
         public DateTime CreatedDate { get; set; }
-        
+
+        public AuthUser AuthUser { get; set; }
+
         public User() { }
 
         public User(string email, string firstName, string middleName, string lastName)
