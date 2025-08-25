@@ -34,6 +34,10 @@ public record Error
     public static Error UserNotFound(Guid userGuid) =>
         new("UserNotFound", $"User with id {userGuid} was not found.");
 
+    public static Error UserAlreadyExists(string email) =>
+        new("UserAlreadyExists", $"User with email {email} was already found.");
+
+
     private static readonly Dictionary<string, Error> _errorsByCode =
     new()
     {
