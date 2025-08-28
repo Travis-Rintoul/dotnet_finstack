@@ -1,30 +1,39 @@
-# Engine
-FinStack.Engine/target/
-
-# Web
-FinStack.Web/node_modules
 
 # API
 FinStack.API/bin
 FinStack.API/obj
 FinStack.API/output.log
 
-# Domain
-FinStack.Domain/bin
-FinStack.Domain/obj
-
-# Infrastructure
-FinStack.Infrastructure/bin
-FinStack.Infrastructure/obj
+# API Tests
+FinStack.API.Tests/bin
+FinStack.API.Tests/obj
 
 #Application
 FinStack.Application/bin
 FinStack.Application/obj
 
-#Test
-FinStack.Test/bin
-FinStack.Test/obj
-
 #Common
 FinStack.Common/bin
 FinStack.Common/obj
+
+#Common Tests
+FinStack.Common.Tests/bin
+FinStack.Common.Tests/obj
+
+#Contracts
+FinStack.Contracts/bin
+FinStack.Contracts/obj
+
+# Domain
+FinStack.Domain/bin
+FinStack.Domain/obj
+
+# Engine
+FinStack.Engine/target/
+
+# Infrastructure
+FinStack.Infrastructure/bin
+FinStack.Infrastructure/obj
+
+# Web
+FinStack.Web/node_modules
