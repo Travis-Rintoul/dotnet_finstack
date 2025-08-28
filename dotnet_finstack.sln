@@ -13,7 +13,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinStack.Domain", "FinStack
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinStack.Common", "FinStack.Common\FinStack.Common.csproj", "{0A330120-7532-400F-976B-7B79108C9936}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinStack.Test", "FinStack.Test\FinStack.Test.csproj", "{FAEA7FD2-CA37-4DED-A4B6-06DB4C241121}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinStack.API.Tests", "FinStack.API.Tests\FinStack.API.Tests.csproj", "{DAF9530A-647C-44B9-A37E-8ACE87E9F4C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinStack.Test", "FinStack.Common.Tests\FinStack.Test.csproj", "{40B399A5-BCF8-4B15-B645-A53EAB500D5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinStack.Contracts", "FinStack.Contracts\FinStack.Contracts.csproj", "{8DF11E44-E0DD-4EA0-9DA7-C9BA6B04E62B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,9 +48,17 @@ Global
 		{0A330120-7532-400F-976B-7B79108C9936}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A330120-7532-400F-976B-7B79108C9936}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A330120-7532-400F-976B-7B79108C9936}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FAEA7FD2-CA37-4DED-A4B6-06DB4C241121}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FAEA7FD2-CA37-4DED-A4B6-06DB4C241121}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FAEA7FD2-CA37-4DED-A4B6-06DB4C241121}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FAEA7FD2-CA37-4DED-A4B6-06DB4C241121}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAF9530A-647C-44B9-A37E-8ACE87E9F4C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAF9530A-647C-44B9-A37E-8ACE87E9F4C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAF9530A-647C-44B9-A37E-8ACE87E9F4C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAF9530A-647C-44B9-A37E-8ACE87E9F4C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40B399A5-BCF8-4B15-B645-A53EAB500D5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40B399A5-BCF8-4B15-B645-A53EAB500D5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40B399A5-BCF8-4B15-B645-A53EAB500D5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40B399A5-BCF8-4B15-B645-A53EAB500D5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DF11E44-E0DD-4EA0-9DA7-C9BA6B04E62B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DF11E44-E0DD-4EA0-9DA7-C9BA6B04E62B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DF11E44-E0DD-4EA0-9DA7-C9BA6B04E62B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DF11E44-E0DD-4EA0-9DA7-C9BA6B04E62B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
