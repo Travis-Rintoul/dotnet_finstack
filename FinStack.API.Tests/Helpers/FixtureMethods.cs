@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using FinStack.Common;
+using FinStack.Contracts.Users;
 
 public static class FixtureMethods
 {
@@ -14,7 +15,7 @@ public static class FixtureMethods
             Password = password
         };
 
-        var response = await client.PostAsJsonAsync("/auth/register", request);
+        var response = await client.PostAsJsonAsync(AuthEndpoints.RegisterUser, request);
 
         if (!response.IsSuccessStatusCode)
         {
