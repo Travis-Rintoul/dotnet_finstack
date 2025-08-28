@@ -13,13 +13,12 @@ public class Result<T>
         Errors = new List<Error>();
     }
 
-
     public Result(Error error)
     {
         Errors = new List<Error> { error };
     }
 
-        public Result(IEnumerable<Error> errors)
+    public Result(IEnumerable<Error> errors)
     {
         Errors = errors.ToList();
     }
@@ -65,12 +64,27 @@ public class Result<T>
             return onFailure(Errors);
         }
     }
+
+    public T? Unwrap()
+    {
+        if (!IsSuccess)
+        {
+            var exceptions = Errors
+                .Select(e => new Exception($"{e.Code}: {e.Message}"))
+                .ToArray();
+
+            throw new AggregateException("Multiple errors occurred.", exceptions);
+        }
+
+        return Value;
+    }
 }
 
 public static class Result
 {
     public static Result<T> Success<T>(T value) => new (value);
     public static Result<T> Failure<T>(Error error) => new(error);
+    public static Result<T> Failure<T>(string code, string message) => new(new Error(code, message));
     public static Result<T> Failure<T>(IEnumerable<Error> errors) => new(errors);
     public static Result<T> Failure<T>(IEnumerable<IdentityError> errors) => new(errors);
 }

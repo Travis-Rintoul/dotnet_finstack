@@ -25,9 +25,9 @@ namespace FinStack.Infrastructure.Repositories
             return new Option<AuthUser>(await context.Users.SingleOrDefaultAsync(u => u.Id == userId));
         }
 
-        public Task<IEnumerable<AuthUser>> GetUsersAsync()
+        public async Task<IEnumerable<AuthUser>> GetUsersAsync()
         {
-            throw new NotImplementedException();
+            return await context.Users.ToListAsync();
         }
 
         public Task<Result<Guid>> UpdateAsync(AuthUser user)

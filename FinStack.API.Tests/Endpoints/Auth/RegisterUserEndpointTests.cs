@@ -1,15 +1,13 @@
 using System.Net.Http.Json;
 using FinStack.Contracts.Users;
 
-public class GetUsersEndpointTests : IClassFixture<TestWebApplicationFactory>
+public class RegisterUserEndpointTests : IClassFixture<TestWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public GetUsersEndpointTests(TestWebApplicationFactory factory)
+    public RegisterUserEndpointTests(TestWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
-        _client.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Test");
     }
 
     [Fact]

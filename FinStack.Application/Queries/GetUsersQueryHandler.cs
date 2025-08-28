@@ -13,17 +13,32 @@ namespace FinStack.Application.Queries
 
     public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, IEnumerable<UserDto>>
     {
-        private readonly IUserRepository _repo;
+        private readonly IUserRepository _usersRepo;
+        private readonly IAuthUserRepository _authUsersRepo;
 
-        public GetUsersQueryHandler(IUserRepository repo)
+        public GetUsersQueryHandler(IUserRepository usersRepo, IAuthUserRepository authUsersRepo)
         {
-            _repo = repo;
+            _usersRepo = usersRepo;
+            _authUsersRepo = authUsersRepo;
         }
 
         public async Task<IEnumerable<UserDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
-            var users = await _repo.GetUsersAsync();
-            return users.Select(u => new UserDto { UserGuid = u.UserGuid });
+            var users = await _usersRepo.GetUsersAsync();
+            var authUsers = await _authUsersRepo.GetUsersAsync();
+
+            return users.Select(user =>
+            {
+                var authUser = authUsers.SingleOrDefault(auth => user.UserGuid == auth.Id);
+
+                return new UserDto
+                {
+                    UserGuid = user.UserGuid,
+                    Email = authUser!.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                };
+            });
         }
     }
 }

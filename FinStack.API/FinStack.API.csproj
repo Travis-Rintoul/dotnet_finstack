@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FinStack.Infrastructure\FinStack.Infrastructure.csproj" />
     <ProjectReference Include="..\FinStack.Application\FinStack.Application.csproj" />
+    <ProjectReference Include="..\FinStack.Contracts\FinStack.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

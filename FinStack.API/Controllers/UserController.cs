@@ -1,44 +1,31 @@
 using MediatR;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using FinStack.Application.Queries;
 using FinStack.Application.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using FinStack.Application.Commands;
+using FinStack.Contracts.Users;
 
 namespace FinStack.API.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route(UserEndpoints.Controller)]
     public class UserController(IMediator mediator, IEngineService engine) : ControllerBase
     {
-        // GET: api/user
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
+        [HttpGet(UserEndpoints.GetUsers)]
+        public async Task<ActionResult<IEnumerable<GetUsersResponseDto>>> GetUsers()
         {
             return Ok(await mediator.Send(new GetUsersQuery()));
         }
 
-        // GET: api/user/{id}
-        [HttpGet("{id}")]
+        [HttpGet(UserEndpoints.GetUserByID)]
         public async Task<ActionResult<string>> GetUser(Guid guid)
         {
             return Ok(await mediator.Send(new GetUserByIdQuery(guid)));
         }
 
-        // TODO: look at if these are needed, register might do the job
-        // POST: api/user
-        [HttpPost]
-        public ActionResult<string> CreateUser([FromBody] string user)
-        {
-            return CreatedAtAction(nameof(GetUser), new { id = 1 }, user);
-        }
-
-        // PUT: api/user/{guid}
-        [HttpPut("{guid}")]
+        [HttpPut(UserEndpoints.UpdateUser)]
         public async Task<IActionResult> UpdateUser(Guid userGuid, [FromBody] UpdateUserDto dto)
         {
             var result = await mediator.Send(new UpdateUserCommand(userGuid, dto));
@@ -54,8 +41,7 @@ namespace FinStack.API.Controllers
             );
         }
 
-        // DELETE: api/user/{id}
-        [HttpDelete("{guid}")]
+        [HttpDelete(UserEndpoints.DeleteUser)]
         public async Task<IActionResult> DeleteUser(Guid guid)
         {
             var result = await mediator.Send(new DeleteUserCommand(guid));
@@ -71,15 +57,13 @@ namespace FinStack.API.Controllers
             );
         }
 
-        // GET: api/user/{UserGUID}/preferences
-        [HttpGet("{guid}/preferences")]
+        [HttpGet(UserPreferenceEndpoints.GetUserPreferences)]
         public ActionResult<string> GetUserPreferences(Guid guid)
         {
             return Ok($"GetUserPreferences");
         }
 
-        // PUT: api/user/preferences
-        [HttpPut("{guid}/preferences")]
+        [HttpPut(UserPreferenceEndpoints.UpdateUserPreferences)]
         public async Task<IActionResult> UpdateUserPreferences(Guid userGuid, [FromBody] CreateUpdateUserPreferenceDto dto)
         {
             var result = await mediator.Send(new CreateUpdateUserPreferenceCommand(userGuid, dto));
@@ -95,7 +79,6 @@ namespace FinStack.API.Controllers
             );
         }
 
-        // TODO: remove debug call to engine
         [AllowAnonymous]
         [HttpGet("test")]
         public async Task<ActionResult> Test()

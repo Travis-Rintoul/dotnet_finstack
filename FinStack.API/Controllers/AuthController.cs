@@ -1,17 +1,19 @@
 using FinStack.Application.DTOs;
 using FinStack.Application.Interfaces;
+using FinStack.Contracts.Auth;
+using FinStack.Contracts.Users;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FinStack.API.Controllers;
 
 [ApiController]
-[Route("auth")]
+[Route(AuthEndpoints.Controller)]
 public class AuthController(IAuthService authService) : ControllerBase
 {
-    [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
+    [HttpPost(AuthEndpoints.RegisterUser)]
+    public async Task<ActionResult<Guid>> Register([FromBody] RegisterUserDto dto)
     {
-        return (await authService.RegisterAsync(dto)).Match<IActionResult>(
+        return (await authService.RegisterAsync(dto)).Match<ActionResult<Guid>>(
             guid => Ok(guid),
             errors => BadRequest(new ResponseMeta
             {
@@ -22,7 +24,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         );
     }
 
-    [HttpPost("login")]
+    [HttpPost(AuthEndpoints.LoginUser)]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
         return (await authService.LoginAsync(dto.Email, dto.Password)).Match<IActionResult>(
@@ -32,8 +34,3 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 }
 
-public class LoginDto
-{
-    public string Email { get; set; }
-    public string Password { get; set; }
-}

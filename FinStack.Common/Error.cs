@@ -14,6 +14,8 @@ public record Error
     [JsonIgnore]
     public ErrorSeverity Severity { get; set; } = ErrorSeverity.Error;
 
+    public Error() { }
+
     public Error(string Code)
     {
         this.Code = Code;

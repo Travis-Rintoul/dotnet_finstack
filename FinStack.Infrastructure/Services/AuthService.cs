@@ -89,6 +89,8 @@ public class AuthService(
         {
             UserGuid = authUserResult.Value,
             Email = dto.Email,
+            FirstName = "test",
+            LastName = "test"
         };
 
         var userResult = await mediator.Send(new CreateUserCommand(userDto));

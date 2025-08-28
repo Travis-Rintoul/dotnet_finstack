@@ -1,12 +1,12 @@
 using System.Net.Http.Json;
-using FinStack.Domain.Entities;
+using FinStack.Common;
 
-public static class TestHelpers
+public static class FixtureMethods
 {
-    public static async Task<Guid> GivenUserAsync(
+    public static async Task<Result<Guid>> GivenUserAsync(
         this HttpClient client,
-        string email = "test@example.com",
-        string password = "Password123!")
+        string email,
+        string password)
     {
         var request = new
         {
@@ -15,8 +15,19 @@ public static class TestHelpers
         };
 
         var response = await client.PostAsJsonAsync("/auth/register", request);
-        response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<Guid>();
+        if (!response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<ResponseMeta>();
+
+            if (result == null)
+            {
+                throw new Exception($"{response.StatusCode}: {response.Content}");
+            }
+
+            return Result.Failure<Guid>(result.Errors);
+        }
+
+        return Result.Success(await response.Content.ReadFromJsonAsync<Guid>());
     }
 }
