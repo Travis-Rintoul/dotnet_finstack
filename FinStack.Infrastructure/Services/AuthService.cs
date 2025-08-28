@@ -6,11 +6,12 @@ using FinStack.Application.Commands;
 using FinStack.Application.DTOs;
 using FinStack.Application.Interfaces;
 using FinStack.Common;
+using FinStack.Domain.Entities;
 using FinStack.Domain.Enums;
-using FinStack.Infrastructure.Commands;
-using FinStack.Infrastructure.Entities;
+using FinStack.Infrastructure.Data;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using static FinStack.Common.Result;
@@ -21,7 +22,8 @@ public class AuthService(
     UserManager<AuthUser> userManager,
     SignInManager<AuthUser> signInManager,
     IConfiguration configuration,
-    IMediator mediator)
+    IMediator mediator,
+    AppDbContext dbContext)
     : IAuthService
 {
     public async Task<Option<AuthResponseDto>> LoginAsync(string email, string password)
@@ -38,7 +40,7 @@ public class AuthService(
             return Option<AuthResponseDto>.None();
         }
 
-        var dto = new AuthUserDto { Id = Guid.Parse(user.Id), Email = user.Email };
+        var dto = new AuthUserDto { UserGuid = user.Id, Email = user.Email };
 
         string? accessToken = GenerateJwtToken(dto).Match<string?>(
             token => token,
@@ -66,8 +68,26 @@ public class AuthService(
 
     public async Task<Result<Guid>> RegisterAsync(RegisterUserDto dto)
     {
+        var authUserDto = new AuthUserDto()
+        {
+            Email = dto.Email,
+            Password = dto.Password,
+            UserType = UserType.Individual,
+        };
+        
+        var authUserResult = await mediator.Send(new CreateAuthUserCommand(authUserDto));
+        if (authUserResult.Failed(out var authErrors))
+        {
+            return Failure<Guid>(authErrors);
+        }
+
+        Console.WriteLine($"2 {authUserResult.Value}");
+
+        var authUser = dbContext.Users.SingleOrDefaultAsync(u => u.Id == authUserResult.Value);
+
         var userDto = new UserDto()
         {
+            UserGuid = authUserResult.Value,
             Email = dto.Email,
         };
 
@@ -77,22 +97,9 @@ public class AuthService(
             return Failure<Guid>(errors);
         }
 
-        var userGuid = userResult.Value;
-        var authUserDto = new AuthUserDto()
-        {
-            Id = userGuid,
-            Email = dto.Email,
-            Password = dto.Password,
-            UserType = UserType.Individual,
-        };
-        
-        var authUserResult = await mediator.Send(new CreateAuthUserCommand(authUserDto));
-        if (userResult.Failed(out var authErrors))
-        {
-            return Failure<Guid>(authErrors);
-        }
+        Console.WriteLine($"3 {userResult.Value}");
 
-        return Success(authUserResult.Value);
+        return Success(userResult.Value);
     }
 
     public async Task<Result<Guid>> UpdateAsync(AuthUserDto userDto)
@@ -100,7 +107,7 @@ public class AuthService(
         var user = await userManager.FindByEmailAsync(userDto.Email);
         if (user == null)
         {
-            return Failure<Guid>(Error.UserNotFound(userDto.Id));
+            return Failure<Guid>(Error.UserNotFound(userDto.UserGuid));
         }
 
         if (userDto.UserType != user.UserType)
@@ -114,7 +121,7 @@ public class AuthService(
             return Failure<Guid>(updateResult.Errors);
         }
         
-        return Success(Guid.Parse(user.Id));
+        return Success(user.Id);
     }
 
     private Result<string> GenerateJwtToken(AuthUserDto user)
@@ -145,9 +152,9 @@ public class AuthService(
         
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserGuid.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+            new Claim(ClaimTypes.NameIdentifier, user.UserGuid.ToString())
         };
         
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
