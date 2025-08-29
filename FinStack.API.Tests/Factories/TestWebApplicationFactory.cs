@@ -1,11 +1,11 @@
+using FinStack.API.Tests.Handlers;
 using FinStack.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
+
+namespace FinStack.API.Tests.Factories;
 
 public class TestWebApplicationFactory : WebApplicationFactory<FinStack.API.Program>
 {
@@ -43,7 +43,13 @@ public class TestWebApplicationFactory : WebApplicationFactory<FinStack.API.Prog
             var provider = services.BuildServiceProvider();
             using var dbScope = provider.CreateScope();
             var db = dbScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            db.Database.EnsureDeleted();
+
+            try
+            {
+                db.Database.EnsureDeleted();
+            }
+            catch (PostgresException ex) when (ex.SqlState == "3D000") { }
+
             db.Database.EnsureCreated();
         });
 

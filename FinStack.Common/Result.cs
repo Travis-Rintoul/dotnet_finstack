@@ -6,7 +6,16 @@ public class Result<T>
 {
     public T? Value { get; }
     public IReadOnlyList<Error> Errors { get; }
+    public IReadOnlyList<string> ErrorCodes {
+        get
+        {
+            return Errors.Select(e => e.Code).ToList();
+        }
+    }
+
     public bool IsSuccess => Errors.Count == 0;
+    public bool IsFailure => Errors.Count > 0;
+
     public Result(T value)
     {
         Value = value;

@@ -8,7 +8,7 @@ namespace FinStack.Domain.Repositories
     {
         Task<Option<Job>> GetByIdAsync(Guid jobId);
         Task<IEnumerable<Job>> GetJobsAsync();
-        Task<Result<Job>> AddAsync(User user);
-        Task<Result<Job>> UpdateAsync(User user);
+        Task<Result<Job>> AddAsync(AppUser user);
+        Task<Result<Job>> UpdateAsync(AppUser user);
     }
 }

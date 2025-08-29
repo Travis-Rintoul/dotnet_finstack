@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinStack.Domain.Entities
 {
-    public class User
+    public class AppUser
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -29,9 +29,9 @@ namespace FinStack.Domain.Entities
 
         public AuthUser AuthUser { get; set; }
 
-        public User() { }
+        public AppUser() { }
 
-        public User(string email, string firstName, string middleName, string lastName)
+        public AppUser(string email, string firstName, string middleName, string lastName)
         {
             if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("Email is required");
             if (string.IsNullOrWhiteSpace(firstName)) throw new ArgumentException("FirstName is required");

@@ -10,12 +10,20 @@ namespace FinStack.Application.Commands;
 
 public record CreateUserCommand(UserDto userDto) : IRequest<Result<Guid>>;
 
-public class CreateUserCommandHandler(IUserRepository repo) : IRequestHandler<CreateUserCommand, Result<Guid>>
+public class CreateUserCommandHandler(IUserRepository repo ) : IRequestHandler<CreateUserCommand, Result<Guid>>
 {
     public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
         var dto = request.userDto;
-        var user = new User
+
+        var authUser = new AuthUser
+        {
+            Id = dto.UserGuid,
+            Email = dto.Email,
+            UserName = dto.Email,
+        };
+
+        var user = new AppUser
         {
             UserGuid = dto.UserGuid,
             FirstName = dto.FirstName,
@@ -23,6 +31,8 @@ public class CreateUserCommandHandler(IUserRepository repo) : IRequestHandler<Cr
             LastName = dto.LastName,
             CreatedDate = DateTime.UtcNow
         };
+
+        authUser.AppUser = user;
         
         var result = await repo.AddAsync(user);
         

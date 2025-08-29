@@ -1,9 +1,9 @@
-using System.Net.Http.Json;
 using FinStack.Common;
 using FinStack.Contracts.Users;
-using FinStack.Domain.Entities;
 
-public static class EndpointMethods
+namespace FinStack.API.Tests.Helpers;
+
+public static class UserEndpointMethods
 {
     public static async Task<Result<GetUsersResponseDto[]>> GetUsersAsync(this HttpClient client)
     {

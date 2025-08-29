@@ -31,13 +31,13 @@ public class UpdateUserCommandHandler(IUserRepository repo) : IRequestHandler<Up
             return Failure<Guid>(errors);
         }
 
-        Option<User> option = await repo.GetByIdAsync(request.userGuid);
+        Option<AppUser> option = await repo.GetByIdAsync(request.userGuid);
         if (option.IsNone)
         {
             return Failure<Guid>(Error.UserNotFound(request.userGuid));
         }
 
-        User user = option.Value;
+        AppUser user = option.Value;
         user.FirstName = dto.FirstName;
         user.MiddleName = dto.MiddleName;
         user.LastName = dto.LastName;

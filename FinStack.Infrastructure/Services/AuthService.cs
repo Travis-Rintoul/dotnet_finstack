@@ -6,6 +6,7 @@ using FinStack.Application.Commands;
 using FinStack.Application.DTOs;
 using FinStack.Application.Interfaces;
 using FinStack.Common;
+using FinStack.Contracts.Auth;
 using FinStack.Domain.Entities;
 using FinStack.Domain.Enums;
 using FinStack.Infrastructure.Data;
@@ -26,39 +27,39 @@ public class AuthService(
     AppDbContext dbContext)
     : IAuthService
 {
-    public async Task<Option<AuthResponseDto>> LoginAsync(string email, string password)
+    public async Task<Result<LoginUserResponseDto>> LoginAsync(string email, string password)
     {
         var user = await userManager.FindByEmailAsync(email);
         if (user == null)
         {
-            return Option<AuthResponseDto>.None();
+            return Failure<LoginUserResponseDto>(UserErrors.NotFound);
         }
 
         var result = await signInManager.CheckPasswordSignInAsync(user, password, false);
         if (!result.Succeeded)
         {
-            return Option<AuthResponseDto>.None();
+            return Failure<LoginUserResponseDto>(AuthErrors.LoginFailed);
         }
 
         var dto = new AuthUserDto { UserGuid = user.Id, Email = user.Email };
 
         string? accessToken = GenerateJwtToken(dto).Match<string?>(
             token => token,
-            error => {
+            errors => {
                 return null;
             }
         );
 
         if (accessToken == null)
         {
-            return Option<AuthResponseDto>.None();
+            return Failure<LoginUserResponseDto>(AuthErrors.LoginFailed);
         }
         
         string refreshToken = GenerateRefreshToken();
         
         await userManager.SetAuthenticationTokenAsync(user, "MyApp", "RefreshToken", refreshToken);
         
-        return Option<AuthResponseDto>.Some(new AuthResponseDto
+        return Success(new LoginUserResponseDto
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken,
@@ -81,16 +82,14 @@ public class AuthService(
             return Failure<Guid>(authErrors);
         }
 
-        Console.WriteLine($"2 {authUserResult.Value}");
-
         var authUser = dbContext.Users.SingleOrDefaultAsync(u => u.Id == authUserResult.Value);
 
         var userDto = new UserDto()
         {
             UserGuid = authUserResult.Value,
             Email = dto.Email,
-            FirstName = "test",
-            LastName = "test"
+            FirstName = "",
+            LastName = ""
         };
 
         var userResult = await mediator.Send(new CreateUserCommand(userDto));
@@ -98,8 +97,6 @@ public class AuthService(
         {
             return Failure<Guid>(errors);
         }
-
-        Console.WriteLine($"3 {userResult.Value}");
 
         return Success(userResult.Value);
     }
@@ -132,19 +129,19 @@ public class AuthService(
         var errors = new List<Error>();
         if (string.IsNullOrWhiteSpace(jwtKey))
         {
-            errors.Add(new Error("JWT_KEY_MISSING", "Signing key is missing in configuration."));
+            errors.Add(AuthErrors.JWT_KEY_MISSING);
         }
         
         var issuer = configuration["JWT:ValidIssuer"];
         if (string.IsNullOrWhiteSpace(issuer))
         {
-            errors.Add(new Error("JWT_ISSUER_MISSING", "Signing issuer is missing in configuration."));
+            errors.Add(AuthErrors.JWT_ISSUER_MISSING);
         }
         
         var audience = configuration["JWT:ValidAudience"];
         if (string.IsNullOrWhiteSpace(audience))
         {
-            errors.Add(new Error("JWT_AUDIENCE_MISSING", "Signing audience is missing in configuration."));
+            errors.Add(AuthErrors.JWT_AUDIENCE_MISSING);
         }
 
         if (errors.Any())

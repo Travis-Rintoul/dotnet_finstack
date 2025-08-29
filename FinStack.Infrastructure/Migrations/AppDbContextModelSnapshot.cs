@@ -130,7 +130,7 @@ namespace FinStack.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Jobs");
+                    b.ToTable("Jobs", (string)null);
                 });
 
             modelBuilder.Entity("FinStack.Domain.Entities.User", b =>
@@ -355,7 +355,7 @@ namespace FinStack.Infrastructure.Migrations
 
                     b.HasIndex("UserGuid");
 
-                    b.ToTable("UserPreferences");
+                    b.ToTable("UserPreferences", (string)null);
                 });
 
             modelBuilder.Entity("FinStack.Domain.Entities.User", b =>

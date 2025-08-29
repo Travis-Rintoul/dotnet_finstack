@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FinStack.Domain\FinStack.Domain.csproj" />
+    <ProjectReference Include="..\FinStack.Contracts\FinStack.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

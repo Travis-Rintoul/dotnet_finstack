@@ -4,6 +4,8 @@ using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 
+namespace FinStack.API.Tests.Handlers;
+
 public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     public TestAuthHandler(

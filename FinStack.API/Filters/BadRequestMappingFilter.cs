@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
+namespace FinStack.API.Filters;
+
 public class BadRequestMappingFilter : IExceptionFilter
 {
     public void OnException(ExceptionContext context)
@@ -9,7 +11,6 @@ public class BadRequestMappingFilter : IExceptionFilter
         {
             var response = new ResponseMeta
             {
-                Code = exception.StatusCode,
                 Message = exception.Message,
             };
 

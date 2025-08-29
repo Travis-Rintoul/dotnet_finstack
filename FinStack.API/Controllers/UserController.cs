@@ -6,85 +6,81 @@ using Microsoft.AspNetCore.Authorization;
 using FinStack.Application.Commands;
 using FinStack.Contracts.Users;
 
-namespace FinStack.API.Controllers
+namespace FinStack.API.Controllers;
+
+[Authorize]
+[ApiController]
+[Route(UserEndpoints.Controller)]
+public class UserController(IMediator mediator, IEngineService engine) : ControllerBase
 {
-    [Authorize]
-    [ApiController]
-    [Route(UserEndpoints.Controller)]
-    public class UserController(IMediator mediator, IEngineService engine) : ControllerBase
+    [HttpGet(UserEndpoints.GetUsers)]
+    public async Task<ActionResult<IEnumerable<GetUsersResponseDto>>> GetUsers()
     {
-        [HttpGet(UserEndpoints.GetUsers)]
-        public async Task<ActionResult<IEnumerable<GetUsersResponseDto>>> GetUsers()
-        {
-            return Ok(await mediator.Send(new GetUsersQuery()));
-        }
+        return Ok(await mediator.Send(new GetUsersQuery()));
+    }
 
-        [HttpGet(UserEndpoints.GetUserByID)]
-        public async Task<ActionResult<string>> GetUser(Guid guid)
-        {
-            return Ok(await mediator.Send(new GetUserByIdQuery(guid)));
-        }
+    [HttpGet(UserEndpoints.GetUserByID)]
+    public async Task<ActionResult<string>> GetUser(Guid guid)
+    {
+        return Ok(await mediator.Send(new GetUserByIdQuery(guid)));
+    }
 
-        [HttpPut(UserEndpoints.UpdateUser)]
-        public async Task<IActionResult> UpdateUser(Guid userGuid, [FromBody] UpdateUserDto dto)
-        {
-            var result = await mediator.Send(new UpdateUserCommand(userGuid, dto));
-            return result.Match<IActionResult>(
-                guid => Ok(guid),
-                (errors) => BadRequest(new ResponseMeta
-                {
-                    Code = 400,
-                    Message = "Validation Failed",
-                    Errors = errors.Where(e => e.Severity == ErrorSeverity.Error),
-                    Warnings = errors.Where(e => e.Severity == ErrorSeverity.Warning),
-                })
-            );
-        }
+    [HttpPut(UserEndpoints.UpdateUser)]
+    public async Task<IActionResult> UpdateUser(Guid userGuid, [FromBody] UpdateUserDto dto)
+    {
+        var result = await mediator.Send(new UpdateUserCommand(userGuid, dto));
+        return result.Match<IActionResult>(
+            guid => Ok(guid),
+            (errors) => BadRequest(new ResponseMeta
+            {
+                Message = "Validation Failed",
+                Errors = errors.Where(e => e.Severity == ErrorSeverity.Error),
+                Warnings = errors.Where(e => e.Severity == ErrorSeverity.Warning),
+            })
+        );
+    }
 
-        [HttpDelete(UserEndpoints.DeleteUser)]
-        public async Task<IActionResult> DeleteUser(Guid guid)
-        {
-            var result = await mediator.Send(new DeleteUserCommand(guid));
-            return result.Match<IActionResult>(
-                guid => Ok(guid),
-                (errors) => BadRequest(new ResponseMeta
-                {
-                    Code = 400,
-                    Message = "Error:",
-                    Errors = errors.Where(e => e.Severity == ErrorSeverity.Error),
-                    Warnings = errors.Where(e => e.Severity == ErrorSeverity.Warning),
-                })
-            );
-        }
+    [HttpDelete(UserEndpoints.DeleteUser)]
+    public async Task<IActionResult> DeleteUser(Guid guid)
+    {
+        var result = await mediator.Send(new DeleteUserCommand(guid));
+        return result.Match<IActionResult>(
+            guid => Ok(guid),
+            (errors) => BadRequest(new ResponseMeta
+            {
+                Message = "Error:",
+                Errors = errors.Where(e => e.Severity == ErrorSeverity.Error),
+                Warnings = errors.Where(e => e.Severity == ErrorSeverity.Warning),
+            })
+        );
+    }
 
-        [HttpGet(UserPreferenceEndpoints.GetUserPreferences)]
-        public ActionResult<string> GetUserPreferences(Guid guid)
-        {
-            return Ok($"GetUserPreferences");
-        }
+    [HttpGet(UserPreferenceEndpoints.GetUserPreferences)]
+    public ActionResult<string> GetUserPreferences(Guid guid)
+    {
+        return Ok($"GetUserPreferences");
+    }
 
-        [HttpPut(UserPreferenceEndpoints.UpdateUserPreferences)]
-        public async Task<IActionResult> UpdateUserPreferences(Guid userGuid, [FromBody] CreateUpdateUserPreferenceDto dto)
-        {
-            var result = await mediator.Send(new CreateUpdateUserPreferenceCommand(userGuid, dto));
-            return result.Match<IActionResult>(
-                _ => Ok(),
-                (errors) => BadRequest(new ResponseMeta
-                {
-                    Code = 400,
-                    Message = "ERROR: ",
-                    Errors = errors.Where(e => e.Severity == ErrorSeverity.Error),
-                    Warnings = errors.Where(e => e.Severity == ErrorSeverity.Warning),
-                })
-            );
-        }
+    [HttpPut(UserPreferenceEndpoints.UpdateUserPreferences)]
+    public async Task<IActionResult> UpdateUserPreferences(Guid userGuid, [FromBody] CreateUpdateUserPreferenceDto dto)
+    {
+        var result = await mediator.Send(new CreateUpdateUserPreferenceCommand(userGuid, dto));
+        return result.Match<IActionResult>(
+            _ => Ok(),
+            (errors) => BadRequest(new ResponseMeta
+            {
+                Message = "ERROR: ",
+                Errors = errors.Where(e => e.Severity == ErrorSeverity.Error),
+                Warnings = errors.Where(e => e.Severity == ErrorSeverity.Warning),
+            })
+        );
+    }
 
-        [AllowAnonymous]
-        [HttpGet("test")]
-        public async Task<ActionResult> Test()
-        {
-            string json = "{ \"command_name\": \"import-file\", \"file_name\": \"test.json\" }";
-            return Ok(engine.ProcessJob("import-file", json));
-        }
+    [AllowAnonymous]
+    [HttpGet("test")]
+    public async Task<ActionResult> Test()
+    {
+        string json = "{ \"command_name\": \"import-file\", \"file_name\": \"test.json\" }";
+        return Ok(engine.ProcessJob("import-file", json));
     }
 }

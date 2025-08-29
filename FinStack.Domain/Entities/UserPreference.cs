@@ -5,7 +5,7 @@ public class UserPreference
 {
     public int Id { get; set; }
     public int UserId { get; set; }
-    public User User { get; set; }
+    public AppUser User { get; set; }
 
     public RiskLevel RiskLevel { get; set; } = RiskLevel.Medium;
     public string[] PreferredMarkets { get; set; } = Array.Empty<string>();

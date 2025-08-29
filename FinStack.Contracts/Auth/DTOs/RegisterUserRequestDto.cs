@@ -2,7 +2,7 @@
 
 namespace FinStack.Contracts.Auth
 {
-    public record LoginUserRequestDto
+    public record RegisterUseRequestDto
     {
         public string Email { get; set; }
         public string Password { get; set; }

@@ -13,7 +13,7 @@ public class AppDbContext : IdentityDbContext<AuthUser, AuthRole, Guid>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-    public DbSet<User> AppUsers { get; set; }
+    public DbSet<AppUser> AppUsers { get; set; }
     public DbSet<Job> Jobs { get; set; }
     public DbSet<UserPreference> UserPreferences { get; set; }
 
@@ -21,14 +21,14 @@ public class AppDbContext : IdentityDbContext<AuthUser, AuthRole, Guid>
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<User>()
+        builder.Entity<AppUser>()
             .ToTable("AppUsers")
             .HasKey(u => u.UserGuid);
 
-        builder.Entity<User>()
+        builder.Entity<AppUser>()
             .HasOne(u => u.AuthUser)
             .WithOne(a => a.AppUser)
-            .HasForeignKey<User>(u => u.UserGuid);
+            .HasForeignKey<AppUser>(u => u.UserGuid);
 
         builder.Entity<AuthUser>().ToTable("AuthUsers");
         builder.Entity<IdentityRole>().ToTable("AuthRoles");
@@ -37,5 +37,23 @@ public class AppDbContext : IdentityDbContext<AuthUser, AuthRole, Guid>
         builder.Entity<IdentityUserLogin<Guid>>().ToTable("AuthUserLogins");
         builder.Entity<IdentityRoleClaim<Guid>>().ToTable("AuthRoleClaims");
         builder.Entity<IdentityUserToken<Guid>>().ToTable("AuthUserTokens");
+    }
+
+    public async Task EnsureConnectionAsync()
+    {
+        var connection = Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open)
+        {
+            await connection.OpenAsync();
+        }
+    }
+
+    public async Task EnsureConnectionClosedAsync()
+    {
+        var connection = Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Closed)
+        {
+            await connection.CloseAsync();
+        }
     }
 }

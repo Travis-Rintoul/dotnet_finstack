@@ -9,7 +9,7 @@ public class AuthUser : IdentityUser<Guid>
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int AuthUserId { get; set; }
-    public User AppUser { get; set; }
+    public AppUser AppUser { get; set; }
 
     [Required]
     [MaxLength(30)]

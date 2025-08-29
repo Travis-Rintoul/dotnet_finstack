@@ -39,7 +39,6 @@ public record Error
     public static Error UserAlreadyExists(string email) =>
         new("UserAlreadyExists", $"User with email {email} was already found.");
 
-
     private static readonly Dictionary<string, Error> _errorsByCode =
     new()
     {

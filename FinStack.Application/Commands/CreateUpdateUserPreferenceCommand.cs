@@ -16,7 +16,7 @@ public class CreateUserPreferenceCommandHandler(IUserRepository userRepo, IUserP
     public async Task<Result<Unit>> Handle(CreateUpdateUserPreferenceCommand request, CancellationToken cancellationToken)
     {
         var dto = request.userDto;
-        Option<User> option = await userRepo.GetByIdAsync(request.userGuid);
+        Option<AppUser> option = await userRepo.GetByIdAsync(request.userGuid);
 
         if (option.IsNone) {
             return Failure<Unit>(Error.UserNotFound(request.userGuid));

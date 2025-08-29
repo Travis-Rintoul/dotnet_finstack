@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Mvc;
 using FinStack.Domain.Entities;
+using FinStack.API.Filters;
 
 namespace FinStack.API;
 
@@ -71,7 +72,6 @@ public class Program {
 
                 var response = new ResponseMeta
                 {
-                    Code = StatusCodes.Status400BadRequest,
                     Message = "ERROR",
                     Errors = errors
                 };

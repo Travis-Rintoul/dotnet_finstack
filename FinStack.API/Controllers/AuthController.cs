@@ -17,19 +17,22 @@ public class AuthController(IAuthService authService) : ControllerBase
             guid => Ok(guid),
             errors => BadRequest(new ResponseMeta
             {
-                Code = 400,
-                Message = "There was an error register...",
+                Message = "Unable to register user.",
                 Errors = errors
             })
         );
     }
 
     [HttpPost(AuthEndpoints.LoginUser)]
-    public async Task<IActionResult> Login([FromBody] LoginDto dto)
+    public async Task<ActionResult<LoginUserResponseDto>> Login([FromBody] LoginUserRequestDto dto)
     {
-        return (await authService.LoginAsync(dto.Email, dto.Password)).Match<IActionResult>(
-            Ok,
-            BadRequest
+        return (await authService.LoginAsync(dto.Email, dto.Password)).Match<ActionResult<LoginUserResponseDto>>(
+            response => Ok(response),
+            errors => BadRequest(new ResponseMeta
+            {
+                Message = "Unable to authenticate.",
+                Errors = errors
+            })
         );
     }
 }

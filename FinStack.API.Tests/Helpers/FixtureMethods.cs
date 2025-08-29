@@ -1,6 +1,9 @@
 using System.Net.Http.Json;
+using FinStack.Application.DTOs;
 using FinStack.Common;
 using FinStack.Contracts.Users;
+
+namespace FinStack.API.Tests.Helpers;
 
 public static class FixtureMethods
 {
@@ -9,7 +12,7 @@ public static class FixtureMethods
         string email,
         string password)
     {
-        var request = new
+        var request = new RegisterUserDto
         {
             Email = email,
             Password = password
