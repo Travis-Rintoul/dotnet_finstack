@@ -1,31 +1,24 @@
-// use std::error::Error;
-// use async_trait::async_trait;
-// use crate::{db::DbContext, services::mediator::Handler};
+use std::{error::Error, sync::Arc};
 
-// pub struct TestCommand {
-//     pub file_path: String,
-// }
+use async_trait::async_trait;
+use serde::Deserialize;
+use tokio::time::{sleep, Duration};
 
-// pub struct TestCommandHandler {
-//     db: DbContext,
-// }
+use crate::services::command_and_query_service::{traits::CommandTrait, CQRSDependencies};
 
-// impl TestCommandHandler {
-//     pub fn new(&self, db_ctx: DbContext) -> Self {
-//         TestCommandHandler {
-//             db: db_ctx
-//         }
-//     }
-// }
+#[derive(Deserialize, Debug)]
+pub struct TestCommand {
+    pub sleep_seconds: u64,
+    pub create_job: bool,
+}
 
-// #[async_trait::async_trait]
-// pub trait TestHandler<C>: Send + Sync {
-//     async fn test(&self, command: &C) -> Result<(), Box<dyn Error + Send + Sync>>;
-// }
-
-// #[async_trait]
-// impl Handler<TestCommand> for TestCommandHandler {
-//     async fn handle(&self, command: &TestCommand) -> Result<(), Box<dyn Error + Send + Sync>> {
-//         Ok(())
-//     }
-// }
+#[async_trait]
+impl CommandTrait for TestCommand {
+    async fn handle(
+        &self,
+        _: Arc<CQRSDependencies>,
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+        sleep(Duration::from_secs(self.sleep_seconds)).await;
+        Ok(())
+    }
+}

@@ -1,19 +1,25 @@
 use std::sync::Arc;
 
-use crate::db::{DbContext, RepositoryFactoryTrait};
+use crate::db::{DbContext, JobsRepository, JobsRepositoryTrait, MockJobsRepository, MockUserRepository, UserRepository, UsersRepositoryTrait};
 
 #[allow(dead_code)]
-#[derive(Default)]
 pub struct CQRSDependencies {
-    pub db: Option<Arc<DbContext>>,
-    pub repository_factory: Option<Box<dyn RepositoryFactoryTrait>>,
+    pub user_repository: Arc<dyn UsersRepositoryTrait>,
+    pub jobs_repository: Arc<dyn JobsRepositoryTrait>,
 }
 
 impl CQRSDependencies {
-    pub fn new(db: Arc<DbContext>, repository_factory: Box<dyn RepositoryFactoryTrait>) -> Self {
+    pub fn concrete(db: Arc<DbContext>) -> Self {
         Self {
-            db: Some(db),
-            repository_factory: Some(repository_factory),
+            user_repository: Arc::new(UserRepository::new(Arc::clone(&db))),
+            jobs_repository: Arc::new(JobsRepository::new(Arc::clone(&db)))
+        }
+    }
+
+    pub fn mock() -> Self {
+        Self {
+            user_repository: Arc::new(MockUserRepository::new()),
+            jobs_repository: Arc::new(MockJobsRepository::new())
         }
     }
 }

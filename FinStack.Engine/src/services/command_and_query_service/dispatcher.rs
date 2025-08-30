@@ -71,7 +71,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_send_query() {
-        let services = Arc::new(CQRSDependencies::default());
+        let services = Arc::new(CQRSDependencies::mock());
         let dispatcher = CQRSDispatcher::new(services);
         let query = TestQuery;
 
@@ -81,7 +81,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_send_command_success() {
-        let services = Arc::new(CQRSDependencies::default());
+        let services = Arc::new(CQRSDependencies::mock());
         let dispatcher = CQRSDispatcher::new(services);
         let command = TestCommand { foo: true };
 
@@ -91,7 +91,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_send_command_failure() {
-        let services = Arc::new(CQRSDependencies::default());
+        let services = Arc::new(CQRSDependencies::mock());
         let dispatcher = CQRSDispatcher::new(services);
         let command = TestCommand { foo: false };
 

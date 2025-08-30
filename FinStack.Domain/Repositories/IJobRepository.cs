@@ -10,5 +10,8 @@ namespace FinStack.Domain.Repositories
         Task<IEnumerable<Job>> GetJobsAsync();
         Task<Result<Job>> AddAsync(AppUser user);
         Task<Result<Job>> UpdateAsync(AppUser user);
+        Task<Option<Job>> PollAsync(Guid jobGuid, 
+            TimeSpan? timeout = null, TimeSpan? pollInterval = null, 
+            CancellationToken ct = default);
     }
 }

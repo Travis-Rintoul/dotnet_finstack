@@ -23,8 +23,6 @@ impl JobsRepository {
 #[async_trait]
 impl JobsRepositoryTrait for JobsRepository {
     async fn create(&self, entity: JobDto) -> Result<Uuid, RepositoryError> {
-        log::error!("JobsRepository->create");
-
         sqlx::query(
             r#"
             INSERT INTO "Jobs" 
@@ -34,7 +32,7 @@ impl JobsRepositoryTrait for JobsRepository {
         "#,
         )
         .bind(entity.guid)
-        .bind(&entity.job_code)
+        .bind(entity.job_code)
         .bind(entity.elapsed)
         .bind(entity.success)
         .bind(entity.start_time)
@@ -43,7 +41,7 @@ impl JobsRepositoryTrait for JobsRepository {
         .execute(&self.ctx.pool)
         .await?;
 
-        Ok(Uuid::new_v4())
+        Ok(entity.guid)
     }
 
     async fn find_by_id(&self, _id: u32) -> Option<JobDto> {

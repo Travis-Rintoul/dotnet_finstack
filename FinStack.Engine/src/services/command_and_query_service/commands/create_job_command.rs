@@ -23,14 +23,9 @@ pub struct CreateJobCommand {
 impl CommandTrait for CreateJobCommand {
     async fn handle(
         &self,
-        services: Arc<CQRSDependencies>,
+        dependencies: Arc<CQRSDependencies>,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
-        let Some(repo_factory) = &services.repository_factory else {
-            log::error!("Unable to initialize repository");
-            return Err("".into());
-        };
-
-        let jobs_repository = repo_factory.create_jobs_repository();
+        let jobs_repository = &dependencies.jobs_repository;
         let dto = JobDto {
             id: -1,
             guid: self.job_guid,
@@ -47,6 +42,8 @@ impl CommandTrait for CreateJobCommand {
             return Err(format!("{error}").into());
         }
 
+        log::error!("Created Job for {}", self.job_guid);
+
         Ok(())
     }
 }
@@ -54,23 +51,23 @@ impl CommandTrait for CreateJobCommand {
 #[cfg(test)]
 mod tests {
 
-    use crate::{db::MockRepositoryFactory, services::command_and_query_service::CQRSDispatcher};
+    use crate::{db::{MockJobsRepository, MockUserRepository}, services::command_and_query_service::CQRSDispatcher};
 
     use super::*;
     use std::sync::Arc;
 
     #[tokio::test]
     async fn should_pass() {
-        let factory = MockRepositoryFactory::new();
 
-        factory
-            .mock_jobs
+        let mock_jobs = MockJobsRepository::new();
+
+        mock_jobs
             .create_method
             .set_behavior(|q| return Ok(q.guid));
 
         let dependencies = Arc::new(CQRSDependencies {
-            db: None,
-            repository_factory: Some(Box::new(factory)),
+            user_repository: Arc::new(MockUserRepository::new()),
+            jobs_repository: Arc::new(mock_jobs)
         });
 
         let dispatcher = CQRSDispatcher::new(dependencies);
@@ -90,16 +87,15 @@ mod tests {
 
     #[tokio::test]
     async fn should_fail() {
-        let factory = MockRepositoryFactory::new();
+        let mock_jobs = MockJobsRepository::new();
 
-        factory
-            .mock_jobs
+        mock_jobs
             .create_method
             .set_behavior(|_| return Err("ERROR".into()));
 
         let dependencies = Arc::new(CQRSDependencies {
-            db: None,
-            repository_factory: Some(Box::new(factory)),
+            user_repository: Arc::new(MockUserRepository::new()),
+            jobs_repository: Arc::new(mock_jobs)
         });
 
         let dispatcher = CQRSDispatcher::new(dependencies);

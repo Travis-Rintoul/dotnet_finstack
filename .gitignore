@@ -7,6 +7,7 @@ FinStack.API/output.log
 # API Tests
 FinStack.API.Tests/bin
 FinStack.API.Tests/obj
+FinStack.API.Tests/output.log
 
 #Application
 FinStack.Application/bin

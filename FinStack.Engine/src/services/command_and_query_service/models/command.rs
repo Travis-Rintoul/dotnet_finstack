@@ -9,7 +9,7 @@ use serde::Deserialize;
 
 use crate::services::command_and_query_service::{
     CQRSDependencies,
-    commands::{CreateJobCommand, ImportFileCommand},
+    commands::{CreateJobCommand, ImportFileCommand, TestCommand},
     traits::CommandTrait,
 };
 
@@ -20,6 +20,8 @@ pub enum Command {
     CreateJob(CreateJobCommand),
     #[serde(rename = "import-file")]
     ImportFile(ImportFileCommand),
+    #[serde(rename = "test")]
+    Test(TestCommand),
 }
 
 impl Display for Command {
@@ -27,6 +29,7 @@ impl Display for Command {
         match self {
             Command::CreateJob(cmd) => write!(f, "create-job: {:?}", cmd),
             Command::ImportFile(cmd) => write!(f, "import-file: {:?}", cmd),
+            Command::Test(cmd) => write!(f, "test: {:?}", cmd)
         }
     }
 }
@@ -40,6 +43,7 @@ impl CommandTrait for Command {
         match self {
             Command::CreateJob(cmd) => cmd.handle(services).await,
             Command::ImportFile(cmd) => cmd.handle(services).await,
+            Command::Test(cmd) => cmd.handle(services).await
         }
     }
 }

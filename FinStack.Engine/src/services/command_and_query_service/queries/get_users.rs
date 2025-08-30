@@ -13,14 +13,9 @@ impl QueryTrait for GetUsersQuery {
 
     async fn execute(
         &self,
-        services: &CQRSDependencies,
+        dependencies: &CQRSDependencies,
     ) -> Result<Self::Response, Box<dyn Error + Send + Sync>> {
-        let Some(repo_factory) = &services.repository_factory else {
-            log::error!("Unable to initialize repository");
-            return Err("".into());
-        };
-
-        let users_repository = repo_factory.create_users_repository();
+        let users_repository = &dependencies.user_repository;
 
         let a = users_repository.find_all().await;
 

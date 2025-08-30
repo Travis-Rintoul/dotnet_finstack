@@ -6,11 +6,9 @@ use tokio::runtime::Runtime;
 
 use crate::{
     JobGuid,
-    db::{DbContext, RepositoryFactory},
-    models::UserDto,
+    db::DbContext,
     services::command_and_query_service::{
         CQRSDependencies, CQRSDispatcher, Command, commands::CreateJobCommand,
-        queries::GetUsersQuery,
     },
 };
 
@@ -27,9 +25,7 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
         };
 
         let db_context = Arc::new(ctx);
-        let repo_factory = RepositoryFactory::new(Arc::clone(&db_context));
-
-        let services = Arc::new(CQRSDependencies::new(db_context, Box::new(repo_factory)));
+        let services = Arc::new(CQRSDependencies::concrete(db_context));
 
         let dispatcher = CQRSDispatcher::new(services);
 
@@ -54,17 +50,9 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
             elapsed
         );
 
-        let get_user_query = GetUsersQuery;
-
-        let user_result: Result<Vec<UserDto>, _> = dispatcher.send_query(get_user_query).await;
-        match user_result {
-            Ok(users) => {
-                println!("Found user: {:?}", users);
-            }
-            Err(e) => {
-                eprintln!("Query failed: {}", e);
-            }
-        }
+        let b = *job_guid.as_bytes();
+        log::info!("job_guid bytes (Rust, RFC4122): {:02x?}", b);
+        log::info!("job_guid string (Rust): {}", job_guid);
 
         let elapsed_us: i64 = elapsed.num_microseconds().unwrap_or(0);
 
@@ -82,8 +70,10 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
             finish_time,
             message,
         };
-
         let result = dispatcher.send_command(create_job_cmd).await;
+
+        log::info!("QQQQQ");
+
         if result.is_err() {
             log::error!("ERROR CREATING JOB");
         }

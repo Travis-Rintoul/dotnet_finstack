@@ -27,13 +27,13 @@ impl CommandTrait for ImportFileCommand {
 #[cfg(test)]
 mod tests {
 
-    use crate::services::command_and_query_service::CQRSDispatcher;
+    use crate::{db::MockUserRepository, services::command_and_query_service::CQRSDispatcher};
 
     use super::*;
     use std::sync::Arc;
 
     async fn setup() -> CQRSDispatcher {
-        let dependencies: Arc<_> = Arc::new(CQRSDependencies::default());
+        let dependencies = Arc::new(CQRSDependencies::mock());
         CQRSDispatcher::new(dependencies)
     }
 
