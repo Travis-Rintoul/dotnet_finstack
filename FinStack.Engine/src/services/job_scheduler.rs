@@ -50,10 +50,6 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
             elapsed
         );
 
-        let b = *job_guid.as_bytes();
-        log::info!("job_guid bytes (Rust, RFC4122): {:02x?}", b);
-        log::info!("job_guid string (Rust): {}", job_guid);
-
         let elapsed_us: i64 = elapsed.num_microseconds().unwrap_or(0);
 
         let (success, message) = match command_result {
@@ -71,8 +67,6 @@ pub fn schedule_job_and_run(command_name: String, command: Command) -> JobGuid {
             message,
         };
         let result = dispatcher.send_command(create_job_cmd).await;
-
-        log::info!("QQQQQ");
 
         if result.is_err() {
             log::error!("ERROR CREATING JOB");

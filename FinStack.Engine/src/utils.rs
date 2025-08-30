@@ -1,5 +1,4 @@
-
-use std::{ffi::CStr, fs::{File, OpenOptions}, path::PathBuf, sync::Once};
+use std::{ffi::CStr, fs::OpenOptions, path::PathBuf, sync::Once};
 
 pub fn ptr_to_string(ptr: *const i8) -> Option<String> {
     if ptr.is_null() {
@@ -18,17 +17,17 @@ pub fn setup_logger() -> Result<PathBuf, Box<dyn std::error::Error>> {
         let mut path = std::env::current_dir().unwrap_or_else(|_| ".".into());
         path.push("../../../output.log");
 
-        let file = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&path);
+        let file = OpenOptions::new().create(true).append(true).open(&path);
 
         let r = file.and_then(|f| {
-            Ok(simplelog::CombinedLogger::init(vec![simplelog::WriteLogger::new(
-                simplelog::LevelFilter::Info,
-                simplelog::Config::default(),
-                f,
-            )]).map(|_| ()))
+            Ok(
+                simplelog::CombinedLogger::init(vec![simplelog::WriteLogger::new(
+                    simplelog::LevelFilter::Info,
+                    simplelog::Config::default(),
+                    f,
+                )])
+                .map(|_| ()),
+            )
         });
 
         match r {
@@ -37,8 +36,6 @@ pub fn setup_logger() -> Result<PathBuf, Box<dyn std::error::Error>> {
                 res = Ok(path);
             }
             Err(e) => {
-                // If someone else already set a logger, you can treat it as OK:
-                // use the error type/text you get to decide. Here we surface it.
                 res = Err(Box::new(e));
             }
         }

@@ -3,7 +3,7 @@ use std::{error::Error, sync::Arc};
 use async_trait::async_trait;
 use serde::Deserialize;
 
-use crate::services::command_and_query_service::{traits::CommandTrait, CQRSDependencies};
+use crate::services::command_and_query_service::{CQRSDependencies, traits::CommandTrait};
 
 #[derive(Deserialize, Debug)]
 pub struct ImportFileCommand {
@@ -12,10 +12,7 @@ pub struct ImportFileCommand {
 
 #[async_trait]
 impl CommandTrait for ImportFileCommand {
-    async fn handle(
-        &self,
-        _: Arc<CQRSDependencies>,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+    async fn handle(&self, _: Arc<CQRSDependencies>) -> Result<(), Box<dyn Error + Send + Sync>> {
         if self.file_name == "" {
             return Err("file_name required".into());
         }
@@ -27,7 +24,7 @@ impl CommandTrait for ImportFileCommand {
 #[cfg(test)]
 mod tests {
 
-    use crate::{db::MockUserRepository, services::command_and_query_service::CQRSDispatcher};
+    use crate::services::command_and_query_service::CQRSDispatcher;
 
     use super::*;
     use std::sync::Arc;

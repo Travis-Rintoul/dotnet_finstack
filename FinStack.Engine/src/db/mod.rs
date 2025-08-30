@@ -1,5 +1,4 @@
 mod database;
-mod pool;
 mod repository;
 mod users;
 

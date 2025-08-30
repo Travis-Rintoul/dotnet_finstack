@@ -10,7 +10,6 @@ use crate::{
 };
 mod config;
 mod db;
-mod error;
 mod jobs;
 mod models;
 mod services;

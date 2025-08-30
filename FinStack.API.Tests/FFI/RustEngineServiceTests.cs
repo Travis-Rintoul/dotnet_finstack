@@ -59,9 +59,6 @@ public class RustEngineServiceTests : IAsyncLifetime
         };
 
         var guid = _engine.ProcessJob(code, JsonSerializer.Serialize(bodyObject));
-
-        Console.WriteLine(guid);
-
         var job = await _jobs.PollAsync(guid);
 
         Assert.Equal(job.Unwrap().Guid, guid);

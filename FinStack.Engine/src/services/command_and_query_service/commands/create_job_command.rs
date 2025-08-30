@@ -5,7 +5,8 @@ use std::{error::Error, sync::Arc};
 use uuid::Uuid;
 
 use crate::{
-    models::JobDto, services::command_and_query_service::{traits::CommandTrait, CQRSDependencies},
+    models::JobDto,
+    services::command_and_query_service::{CQRSDependencies, traits::CommandTrait},
 };
 
 #[derive(Debug, Deserialize, Clone)]
@@ -50,24 +51,23 @@ impl CommandTrait for CreateJobCommand {
 
 #[cfg(test)]
 mod tests {
-
-    use crate::{db::{MockJobsRepository, MockUserRepository}, services::command_and_query_service::CQRSDispatcher};
+    use crate::{
+        db::{MockJobsRepository, MockUserRepository},
+        services::command_and_query_service::CQRSDispatcher,
+    };
 
     use super::*;
     use std::sync::Arc;
 
     #[tokio::test]
     async fn should_pass() {
-
         let mock_jobs = MockJobsRepository::new();
 
-        mock_jobs
-            .create_method
-            .set_behavior(|q| return Ok(q.guid));
+        mock_jobs.create_method.set_behavior(|q| return Ok(q.guid));
 
         let dependencies = Arc::new(CQRSDependencies {
             user_repository: Arc::new(MockUserRepository::new()),
-            jobs_repository: Arc::new(mock_jobs)
+            jobs_repository: Arc::new(mock_jobs),
         });
 
         let dispatcher = CQRSDispatcher::new(dependencies);
@@ -95,7 +95,7 @@ mod tests {
 
         let dependencies = Arc::new(CQRSDependencies {
             user_repository: Arc::new(MockUserRepository::new()),
-            jobs_repository: Arc::new(mock_jobs)
+            jobs_repository: Arc::new(mock_jobs),
         });
 
         let dispatcher = CQRSDispatcher::new(dependencies);
