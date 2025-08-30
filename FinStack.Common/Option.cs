@@ -9,7 +9,7 @@ public readonly struct Option<T>
     }
 
     public bool IsNone => !IsSome;
-    
+
     public Option(T? value)
     {
         if (value != null)
@@ -77,7 +77,7 @@ public readonly struct Option<T>
 
 public static class Option
 {
-    public static Option<T> Some<T>(T value) => new (value);
-    public static Option<T> None<T>() => new ();
-    
+    public static Option<T> Some<T>(T value) => new(value);
+    public static Option<T> None<T>() => new();
+
 }

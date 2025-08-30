@@ -22,7 +22,8 @@ public class UpdateUserCommandHandler(IUserRepository repo) : IRequestHandler<Up
             errors.Add(Error.FirstNameRequired);
         }
 
-        if (string.IsNullOrWhiteSpace(dto.LastName)) {
+        if (string.IsNullOrWhiteSpace(dto.LastName))
+        {
             errors.Add(Error.LastNameRequired);
         }
 

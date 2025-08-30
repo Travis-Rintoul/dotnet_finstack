@@ -18,7 +18,7 @@ public static class FixtureMethods
             Email = email,
             Password = password
         };
-        
+
         return await client.RegisterUserAsync(request);
     }
 }

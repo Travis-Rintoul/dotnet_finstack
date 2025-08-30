@@ -102,7 +102,7 @@ public static class EndpointHelperMethods
         {
             return false;
         }
-        
+
         return typeof(IEnumerable).IsAssignableFrom(t);
     }
 

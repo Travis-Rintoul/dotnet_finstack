@@ -21,7 +21,7 @@ public class RegisterUserEndpointTests : IAsyncLifetime
 
     public async Task InitializeAsync() => await _factory.ResetDatabaseAsync();
     public Task DisposeAsync() => Task.CompletedTask;
-    
+
     [Fact]
     public async Task RegisterUser_ShouldPass()
     {

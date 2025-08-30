@@ -10,7 +10,7 @@ public record Error
 {
     public string Code { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
-    
+
     [JsonIgnore]
     public ErrorSeverity Severity { get; set; } = ErrorSeverity.Error;
 

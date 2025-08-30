@@ -7,7 +7,8 @@ public class Result<T>
     private readonly T _value;
 
     public IReadOnlyList<Error> Errors { get; }
-    public IReadOnlyList<string> ErrorCodes {
+    public IReadOnlyList<string> ErrorCodes
+    {
         get
         {
             return Errors.Select(e => e.Code).ToList();

@@ -1,4 +1,4 @@
-using Xunit; 
+using Xunit;
 using FinStack.API.Tests.Factories;
 using FinStack.API.Tests.Helpers;
 using FinStack.Contracts.Users;

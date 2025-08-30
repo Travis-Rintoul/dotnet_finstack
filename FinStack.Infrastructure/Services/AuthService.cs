@@ -45,7 +45,8 @@ public class AuthService(
 
         string? accessToken = GenerateJwtToken(dto).Match<string?>(
             token => token,
-            errors => {
+            errors =>
+            {
                 return null;
             }
         );
@@ -54,11 +55,11 @@ public class AuthService(
         {
             return Failure<LoginUserResponseDto>(AuthErrors.LoginFailed);
         }
-        
+
         string refreshToken = GenerateRefreshToken();
-        
+
         await userManager.SetAuthenticationTokenAsync(user, "MyApp", "RefreshToken", refreshToken);
-        
+
         return Success(new LoginUserResponseDto
         {
             AccessToken = accessToken,
@@ -75,7 +76,8 @@ public class AuthService(
             return Failure<Guid>(UserErrors.AlreadyExists);
         }
 
-        var authUserDto = new AuthUserDto {
+        var authUserDto = new AuthUserDto
+        {
             Email = dto.Email,
             Password = dto.Password,
             UserType = UserType.Individual,
@@ -85,7 +87,8 @@ public class AuthService(
         if (authUserResult.Failed(out var authErrors))
             return Failure<Guid>(authErrors);
 
-        var userDto = new UserDto {
+        var userDto = new UserDto
+        {
             UserGuid = authUserResult.Unwrap(),
             Email = dto.Email,
             FirstName = "",
@@ -108,13 +111,13 @@ public class AuthService(
         {
             user.UserType = userDto.UserType;
         }
-        
+
         var updateResult = await userManager.UpdateAsync(user);
         if (!updateResult.Succeeded)
         {
             return Failure<Guid>(updateResult.Errors);
         }
-        
+
         return Success(user.Id);
     }
 
@@ -126,13 +129,13 @@ public class AuthService(
         {
             errors.Add(AuthErrors.JWT_KEY_MISSING);
         }
-        
+
         var issuer = configuration["JWT:ValidIssuer"];
         if (string.IsNullOrWhiteSpace(issuer))
         {
             errors.Add(AuthErrors.JWT_ISSUER_MISSING);
         }
-        
+
         var audience = configuration["JWT:ValidAudience"];
         if (string.IsNullOrWhiteSpace(audience))
         {
@@ -143,14 +146,14 @@ public class AuthService(
         {
             return Failure<string>(errors);
         }
-        
+
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.UserGuid.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(ClaimTypes.NameIdentifier, user.UserGuid.ToString())
         };
-        
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -163,7 +166,7 @@ public class AuthService(
 
         return Success(new JwtSecurityTokenHandler().WriteToken(token));
     }
-    
+
     private static string GenerateRefreshToken(int size = 32)
     {
         var randomBytes = new byte[size];
@@ -171,7 +174,7 @@ public class AuthService(
         {
             rng.GetBytes(randomBytes);
         }
-        
+
         return Convert.ToBase64String(randomBytes)
             .TrimEnd('=')
             .Replace('+', '-')

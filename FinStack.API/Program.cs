@@ -18,7 +18,8 @@ using FinStack.API.Filters;
 
 namespace FinStack.API;
 
-public class Program {
+public class Program
+{
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -92,7 +93,7 @@ public class Program {
         builder.Services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
         builder.Services.AddScoped<IAuthUserRepository, AuthUserRepository>();
 
-        var app = builder.Build(); 
+        var app = builder.Build();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();

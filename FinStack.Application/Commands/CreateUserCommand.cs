@@ -15,7 +15,7 @@ public class CreateUserCommandHandler(IUserRepository repo) : IRequestHandler<Cr
     public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
         var dto = request.userDto;
-        
+
         var user = new AppUser
         {
             UserGuid = dto.UserGuid,
@@ -24,9 +24,9 @@ public class CreateUserCommandHandler(IUserRepository repo) : IRequestHandler<Cr
             LastName = dto.LastName,
             CreatedDate = DateTime.UtcNow
         };
-        
+
         var result = await repo.AddAsync(user);
-        
+
         return result.Match(
             guid => Success(guid),
             (ex) => Failure<Guid>(ex)

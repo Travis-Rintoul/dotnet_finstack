@@ -10,7 +10,7 @@ namespace FinStack.Application.Commands;
 
 public record CreateUpdateUserPreferenceCommand(Guid userGuid, CreateUpdateUserPreferenceDto userDto) : IRequest<Result<Unit>>;
 
-public class CreateUserPreferenceCommandHandler(IUserRepository userRepo, IUserPreferenceRepository userPrefsRepo) 
+public class CreateUserPreferenceCommandHandler(IUserRepository userRepo, IUserPreferenceRepository userPrefsRepo)
     : IRequestHandler<CreateUpdateUserPreferenceCommand, Result<Unit>>
 {
     public async Task<Result<Unit>> Handle(CreateUpdateUserPreferenceCommand request, CancellationToken cancellationToken)
@@ -18,7 +18,8 @@ public class CreateUserPreferenceCommandHandler(IUserRepository userRepo, IUserP
         var dto = request.userDto;
         Option<AppUser> option = await userRepo.GetByIdAsync(request.userGuid);
 
-        if (option.IsNone) {
+        if (option.IsNone)
+        {
             return Failure<Unit>(Error.UserNotFound(request.userGuid));
         }
 

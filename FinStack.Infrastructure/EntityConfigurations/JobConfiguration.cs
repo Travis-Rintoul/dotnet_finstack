@@ -8,17 +8,17 @@ namespace FinStack.Infrastructure.EntityConfigurations
     {
         public void Configure(EntityTypeBuilder<AppUser> builder)
         {
-                builder.ToTable("Jobs");
+            builder.ToTable("Jobs");
 
-                // Primary key
-                builder.HasKey(u => u.Id);
+            // Primary key
+            builder.HasKey(u => u.Id);
 
-                // Properties
-                builder.Property(u => u.Id)
-                    .ValueGeneratedOnAdd();
+            // Properties
+            builder.Property(u => u.Id)
+                .ValueGeneratedOnAdd();
 
-                builder.Property(u => u.CreatedDate)
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            builder.Property(u => u.CreatedDate)
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
         }
     }
 }

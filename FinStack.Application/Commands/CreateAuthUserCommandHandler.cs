@@ -29,7 +29,7 @@ public class CreateAuthUserCommandHandler(UserManager<AuthUser> userManager, IMe
             UserName = dto.Email,
             UserType = dto.UserType,
         };
-        
+
         var result = await userManager.CreateAsync(user, dto.Password);
         if (!result.Succeeded)
         {

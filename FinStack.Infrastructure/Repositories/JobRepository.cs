@@ -32,8 +32,8 @@ namespace FinStack.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<Option<Job>> PollAsync(Guid jobGuid, 
-            TimeSpan? timeout = null, TimeSpan? pollInterval = null, 
+        public async Task<Option<Job>> PollAsync(Guid jobGuid,
+            TimeSpan? timeout = null, TimeSpan? pollInterval = null,
             CancellationToken ct = default)
         {
             var until = DateTime.UtcNow + (timeout ?? TimeSpan.FromSeconds(10));

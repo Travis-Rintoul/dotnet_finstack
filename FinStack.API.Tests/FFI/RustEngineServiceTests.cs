@@ -1,4 +1,4 @@
-using Xunit; 
+using Xunit;
 using FinStack.API.Tests.Factories;
 using FinStack.API.Tests.Helpers;
 using FinStack.Contracts.Users;
@@ -30,7 +30,8 @@ public class RustEngineServiceTests : IAsyncLifetime
     {
         await _factory.ResetDatabaseAsync();
 
-        var rc = _engine.Configure(new EngineConfig {
+        var rc = _engine.Configure(new EngineConfig
+        {
             enviroment = "Test",
             user = "postgres",
             password = "postgres",

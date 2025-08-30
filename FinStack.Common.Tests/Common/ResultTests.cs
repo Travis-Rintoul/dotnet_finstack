@@ -77,7 +77,7 @@ public class ResultTests
         Assert.Single(errors);
     }
 
-    
+
     [Fact]
     public void Match_HandlesSuccess()
     {
