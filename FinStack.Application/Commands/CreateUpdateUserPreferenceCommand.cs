@@ -22,7 +22,7 @@ public class CreateUserPreferenceCommandHandler(IUserRepository userRepo, IUserP
             return Failure<Unit>(Error.UserNotFound(request.userGuid));
         }
 
-        var user = option.Value;
+        var user = option.Unwrap();
         var userPrefs = new UserPreference
         {
             User = user,

@@ -20,6 +20,6 @@ public class DeleteUserCommandHandler(IUserRepository repo) : IRequestHandler<De
             return Failure<Unit>(Error.UserNotFound(request.userGuid));
         }
 
-        return await repo.DeleteAysnc(option.Value);
+        return await repo.DeleteAysnc(option.Unwrap());
     }
 }

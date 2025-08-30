@@ -2,13 +2,16 @@ namespace FinStack.Common;
 
 public readonly struct Option<T>
 {
-    private readonly T _value;
-    public bool IsSome { get; }
+    private readonly T? _value;
+    public bool IsSome
+    {
+        get { return _value != null; }
+    }
+
     public bool IsNone => !IsSome;
     
     public Option(T? value)
     {
-        IsSome = value != null;
         if (value != null)
         {
             _value = value;
@@ -23,11 +26,17 @@ public readonly struct Option<T>
         return new Option<T>(value);
     }
 
-    public static Option<T> None() => default;
+    public T Unwrap()
+    {
+        if (IsNone)
+        {
+            throw new Exception();
+        }
 
-    public T Value => IsSome
-        ? _value
-        : throw new InvalidOperationException("Option has no value");
+        return _value;
+    }
+
+    public static Option<T> None() => default;
 
     public bool TryGetValue(out T value)
     {

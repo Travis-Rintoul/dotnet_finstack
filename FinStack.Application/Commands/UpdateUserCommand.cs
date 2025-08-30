@@ -37,7 +37,7 @@ public class UpdateUserCommandHandler(IUserRepository repo) : IRequestHandler<Up
             return Failure<Guid>(Error.UserNotFound(request.userGuid));
         }
 
-        AppUser user = option.Value;
+        AppUser user = option.Unwrap();
         user.FirstName = dto.FirstName;
         user.MiddleName = dto.MiddleName;
         user.LastName = dto.LastName;
