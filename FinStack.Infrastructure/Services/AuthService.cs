@@ -86,7 +86,7 @@ public class AuthService(
             return Failure<Guid>(authErrors);
 
         var userDto = new UserDto {
-            UserGuid = authUserResult.Value,
+            UserGuid = authUserResult.Unwrap(),
             Email = dto.Email,
             FirstName = "",
             LastName = ""

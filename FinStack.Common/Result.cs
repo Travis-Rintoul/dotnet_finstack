@@ -5,15 +5,6 @@ namespace FinStack.Common;
 public class Result<T>
 {
     private readonly T _value;
-    public T Value
-    {
-        get
-        {
-            if (IsFailure)
-                throw new InvalidOperationException("Cannot access Value when result is a failure.");
-            return _value;
-        }
-    }
 
     public IReadOnlyList<Error> Errors { get; }
     public IReadOnlyList<string> ErrorCodes {
@@ -66,7 +57,7 @@ public class Result<T>
     {
         if (IsSuccess)
         {
-            value = Value!;
+            value = _value!;
             return true;
         }
         else
@@ -80,7 +71,7 @@ public class Result<T>
     {
         if (IsSuccess)
         {
-            return onSuccess(Value!);
+            return onSuccess(_value!);
         }
         else
         {
@@ -99,7 +90,7 @@ public class Result<T>
             throw new AggregateException("Multiple errors occurred.", exceptions);
         }
 
-        return Value;
+        return _value;
     }
 }
 

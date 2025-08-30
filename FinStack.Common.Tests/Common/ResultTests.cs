@@ -15,7 +15,7 @@ public class ResultTests
         var result = Result.Success("Hello");
 
         Assert.True(result.IsSuccess);
-        Assert.Equal("Hello", result.Value);
+        Assert.Equal("Hello", result.Unwrap());
         Assert.Empty(result.Errors);
     }
 
