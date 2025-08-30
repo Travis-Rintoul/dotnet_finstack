@@ -28,7 +28,7 @@ public class LoginUserEndpointTests : IAsyncLifetime
     [Fact]
     public async Task LoginUser_ShouldPass_WhenValidLogin()
     {
-        await _client.GivenUserAsync("test@gmail.com", "Abc123!").UnwrapAsync();
+        await _factory.GivenUserAsync("test@gmail.com", "Abc123!").UnwrapAsync();
         var dto = new LoginUserRequestDto
         {
             Email = "test@gmail.com",
@@ -43,7 +43,7 @@ public class LoginUserEndpointTests : IAsyncLifetime
     [Fact]
     public async Task LoginUser_ShouldFail_WhenInvalidPassword()
     {
-        await _client.GivenUserAsync("test@gmail.com", "Abc123!").UnwrapAsync();
+        await _factory.GivenUserAsync("test@gmail.com", "Abc123!").UnwrapAsync();
 
         var dto = new LoginUserRequestDto
         {
@@ -58,7 +58,7 @@ public class LoginUserEndpointTests : IAsyncLifetime
     [Fact]
     public async Task LoginUser_ShouldFail_WhenInvalidEmail()
     {
-        await _client.GivenUserAsync("test@gmail.com", "Abc123!").UnwrapAsync();
+        await _factory.GivenUserAsync("test@gmail.com", "Abc123!").UnwrapAsync();
 
         var dto = new LoginUserRequestDto
         {
