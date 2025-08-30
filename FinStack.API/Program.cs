@@ -26,6 +26,9 @@ public class Program {
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("default")));
 
+        builder.Services.AddDbContextFactory<AppDbContext>(options =>
+            options.UseNpgsql(builder.Configuration.GetConnectionString("default")));
+
         builder.Services.AddIdentity<AuthUser, AuthRole>()
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
@@ -88,6 +91,7 @@ public class Program {
         builder.Services.AddMediatR(typeof(CreateUpdateUserPreferenceCommand).Assembly);
 
         builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IJobRepository, JobRepository>();
         builder.Services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
         builder.Services.AddScoped<IAuthUserRepository, AuthUserRepository>();
 

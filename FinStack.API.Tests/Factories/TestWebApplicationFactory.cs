@@ -4,6 +4,7 @@ using FinStack.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
 
 namespace FinStack.API.Tests.Factories;
@@ -16,7 +17,7 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureAppConfiguration(configuration =>
         {
-            configuration.AddJsonFile("appsettings.Test.json");
+            configuration.AddJsonFile("appsettings.Test.json", optional: false);
         });
 
         builder.ConfigureServices(services =>
@@ -28,24 +29,38 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
             })
             .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", options => { });
 
-            // Deregister existing service
-            var AppDbContextService = services.Single(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-            services.Remove(AppDbContextService);
+            services.RemoveAll<DbContextOptions<AppDbContext>>();
+            services.RemoveAll<AppDbContext>();
+            services.RemoveAll<IDbContextFactory<AppDbContext>>();
+            services.RemoveAll<Microsoft.EntityFrameworkCore.Infrastructure.IDbContextOptionsConfiguration<AppDbContext>>();
+
+            var poolDescriptors = services
+                .Where(d =>
+                    d.ServiceType.FullName == "Microsoft.EntityFrameworkCore.Internal.IDbContextPool`1" ||
+                    d.ImplementationType?.FullName == "Microsoft.EntityFrameworkCore.Internal.DbContextPool`1")
+                .ToList();
+
+            foreach (var d in poolDescriptors)
+            {
+                services.Remove(d);
+            }
 
             using (var provider = services.BuildServiceProvider())
             {
                 var configuration = provider.GetRequiredService<IConfiguration>();
-
                 dbConnectionString = configuration.GetConnectionString("Test")
                     ?? throw new InvalidOperationException("Missing ConnectionStrings:Test in appsettings.Test.json");
             }
 
-            services.AddDbContext<AppDbContext>(opts =>
+            services.AddPooledDbContextFactory<AppDbContext>(opts =>
             {
                 opts.UseNpgsql(dbConnectionString);
                 opts.EnableDetailedErrors();
                 opts.EnableSensitiveDataLogging();
             });
+
+            services.AddScoped(sp =>
+                sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
             var hosted = services.Where(s => typeof(IHostedService).IsAssignableFrom(s.ServiceType)).ToList();
             foreach (var svc in hosted)

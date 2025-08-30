@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using FinStack.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using FinStack.Common;
 
 namespace FinStack.Infrastructure.Data;
 
@@ -55,5 +56,53 @@ public class AppDbContext : IdentityDbContext<AuthUser, AuthRole, Guid>
         {
             await connection.CloseAsync();
         }
+    }
+}
+
+public static class AppDbContextExtensions
+{
+    public static async Task<bool> WaitForExistAsync<T>(
+        this AppDbContext db,
+        Func<IQueryable<T>, IQueryable<T>> queryBuilder,
+        TimeSpan timeout,
+        TimeSpan pollInterval,
+        CancellationToken ct = default)
+        where T : class
+    {
+        var start = DateTime.UtcNow;
+        while (DateTime.UtcNow - start < timeout)
+        {
+            var query = queryBuilder(db.Set<T>().AsNoTracking());
+            if (await query.AnyAsync(ct).ConfigureAwait(false))
+                return true;
+
+            await Task.Delay(pollInterval, ct).ConfigureAwait(false);
+        }
+        return false;
+    }
+
+    public static async Task<Option<T>> WaitForRecordAsync<T>(
+        this AppDbContext db,
+        Func<IQueryable<T>, IQueryable<T>> queryBuilder,
+        TimeSpan timeout,
+        TimeSpan pollInterval,
+        CancellationToken ct = default)
+        where T : class
+    {
+        var start = DateTime.UtcNow;
+        while (DateTime.UtcNow - start < timeout)
+        {
+            var query = queryBuilder(db.Set<T>().AsNoTracking());
+
+            var result = await query.SingleOrDefaultAsync(ct).ConfigureAwait(false);
+
+            if (result != null)
+            {
+                return Option.Some(result);
+            }
+            await Task.Delay(pollInterval, ct).ConfigureAwait(false);
+        }
+
+        return Option.None<T>();
     }
 }
