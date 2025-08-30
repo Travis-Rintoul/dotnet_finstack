@@ -1,15 +1,15 @@
+using Xunit; 
 using FinStack.API.Tests.Factories;
 using FinStack.API.Tests.Helpers;
 using FinStack.Contracts.Users;
-using FinStack.Infrastructure.Data;
 
-namespace FinStack.API.Tests.Endpoints.User;
+namespace FinStack.API.Tests.Endpoints;
 
 [Collection(EndpointCollection.Definition)]
-public class GetUsersEndpointTests : IClassFixture<TestWebApplicationFactory>, IAsyncLifetime
+public class GetUsersEndpointTests : IAsyncLifetime
 {
-    private readonly HttpClient _client;
     private readonly TestWebApplicationFactory _factory;
+    private readonly HttpClient _client;
 
     public GetUsersEndpointTests(TestWebApplicationFactory factory)
     {
@@ -19,17 +19,7 @@ public class GetUsersEndpointTests : IClassFixture<TestWebApplicationFactory>, I
             new System.Net.Http.Headers.AuthenticationHeaderValue("Test");
     }
 
-    public async Task InitializeAsync()
-    {
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            await context.EnsureConnectionAsync();
-            await context.TruncateAllTablesAsync();
-            await context.EnsureConnectionClosedAsync();
-        }
-    }
-
+    public async Task InitializeAsync() => await _factory.ResetDatabaseAsync();
     public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
@@ -59,6 +49,4 @@ public class GetUsersEndpointTests : IClassFixture<TestWebApplicationFactory>, I
         Assert.True(users.IsSuccess);
         Assert.Equal(expected, users.Unwrap());
     }
-
-
 }

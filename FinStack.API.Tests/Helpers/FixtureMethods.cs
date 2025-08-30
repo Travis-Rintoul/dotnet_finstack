@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using FinStack.Application.DTOs;
 using FinStack.Common;
+using FinStack.Contracts.Auth;
 using FinStack.Contracts.Users;
 
 namespace FinStack.API.Tests.Helpers;
@@ -12,26 +13,12 @@ public static class FixtureMethods
         string email,
         string password)
     {
-        var request = new RegisterUserDto
+        var request = new RegisterUseRequestDto
         {
             Email = email,
             Password = password
         };
-
-        var response = await client.PostAsJsonAsync(AuthEndpoints.RegisterUser, request);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var result = await response.Content.ReadFromJsonAsync<ResponseMeta>();
-
-            if (result == null)
-            {
-                throw new Exception($"{response.StatusCode}: {response.Content}");
-            }
-
-            return Result.Failure<Guid>(result.Errors);
-        }
-
-        return Result.Success(await response.Content.ReadFromJsonAsync<Guid>());
+        
+        return await client.RegisterUserAsync(request);
     }
 }

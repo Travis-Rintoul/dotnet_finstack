@@ -1,3 +1,4 @@
+using System.Data;
 using FinStack.API.Tests.Handlers;
 using FinStack.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication;
@@ -7,13 +8,15 @@ using Npgsql;
 
 namespace FinStack.API.Tests.Factories;
 
-public class TestWebApplicationFactory : WebApplicationFactory<FinStack.API.Program>
+public class TestWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
+    private string? dbConnectionString;
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration((context, config) =>
+        builder.ConfigureAppConfiguration(configuration =>
         {
-            config.AddJsonFile("appsettings.Test.json");
+            configuration.AddJsonFile("appsettings.Test.json");
         });
 
         builder.ConfigureServices(services =>
@@ -25,43 +28,73 @@ public class TestWebApplicationFactory : WebApplicationFactory<FinStack.API.Prog
             })
             .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", options => { });
 
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-            if (descriptor != null)
+            // Deregister existing service
+            var AppDbContextService = services.Single(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+            services.Remove(AppDbContextService);
+
+            using (var provider = services.BuildServiceProvider())
             {
-                services.Remove(descriptor);
+                var configuration = provider.GetRequiredService<IConfiguration>();
+
+                dbConnectionString = configuration.GetConnectionString("Test")
+                    ?? throw new InvalidOperationException("Missing ConnectionStrings:Test in appsettings.Test.json");
             }
 
-            var sp = services.BuildServiceProvider();
-            using var scope = sp.CreateScope();
-            var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-
-            services.AddDbContext<AppDbContext>(options =>
+            services.AddDbContext<AppDbContext>(opts =>
             {
-                options.UseNpgsql(configuration.GetConnectionString("Test"));
+                opts.UseNpgsql(dbConnectionString);
+                opts.EnableDetailedErrors();
+                opts.EnableSensitiveDataLogging();
             });
 
-            var provider = services.BuildServiceProvider();
-            using var dbScope = provider.CreateScope();
-            var db = dbScope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-            try
+            var hosted = services.Where(s => typeof(IHostedService).IsAssignableFrom(s.ServiceType)).ToList();
+            foreach (var svc in hosted)
             {
-                db.Database.EnsureDeleted();
+                services.Remove(svc);
             }
-            catch (PostgresException ex) when (ex.SqlState == "3D000") { }
-
-            db.Database.EnsureCreated();
         });
+    }
 
-        builder.Configure(app =>
+    public Task InitializeAsync() => Task.CompletedTask;
+    public Task DisposeAsync() => Task.CompletedTask;
+
+    public async Task ResetDatabaseAsync()
+    {
+        if (string.IsNullOrWhiteSpace(dbConnectionString))
         {
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
-            app.UseEndpoints(endpoints =>
+            throw new InvalidOperationException("Factory not initialized.");
+        }
+
+        await using (var connection = new NpgsqlConnection(dbConnectionString))
+        {
+            if (connection.State != ConnectionState.Open)
             {
-                endpoints.MapControllers();
-            });
-        });
+                await connection.OpenAsync();
+            }
+
+            const string sql = @"
+                DO $$
+                DECLARE
+                    stmt text;
+                BEGIN
+                    SELECT
+                        'TRUNCATE TABLE ' ||
+                        string_agg(format('%I.%I', schemaname, tablename), ', ')
+                        || ' RESTART IDENTITY CASCADE;'
+                    INTO stmt
+                    FROM pg_tables
+                    WHERE schemaname = 'public'
+                    AND tablename <> '__EFMigrationsHistory';
+
+                    IF stmt IS NOT NULL THEN
+                        EXECUTE stmt;
+                    END IF;
+                END $$;";
+
+            await using (var command = new NpgsqlCommand(sql, connection))
+            {
+                await command.ExecuteNonQueryAsync();
+            }
+        }
     }
 }

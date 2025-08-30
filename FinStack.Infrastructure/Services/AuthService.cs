@@ -69,23 +69,23 @@ public class AuthService(
 
     public async Task<Result<Guid>> RegisterAsync(RegisterUserDto dto)
     {
-        var authUserDto = new AuthUserDto()
+        var exists = await dbContext.Users.AnyAsync(x => x.Email == dto.Email);
+        if (exists)
         {
+            return Failure<Guid>(UserErrors.AlreadyExists);
+        }
+
+        var authUserDto = new AuthUserDto {
             Email = dto.Email,
             Password = dto.Password,
             UserType = UserType.Individual,
         };
-        
+
         var authUserResult = await mediator.Send(new CreateAuthUserCommand(authUserDto));
         if (authUserResult.Failed(out var authErrors))
-        {
             return Failure<Guid>(authErrors);
-        }
 
-        var authUser = dbContext.Users.SingleOrDefaultAsync(u => u.Id == authUserResult.Value);
-
-        var userDto = new UserDto()
-        {
+        var userDto = new UserDto {
             UserGuid = authUserResult.Value,
             Email = dto.Email,
             FirstName = "",
@@ -93,12 +93,7 @@ public class AuthService(
         };
 
         var userResult = await mediator.Send(new CreateUserCommand(userDto));
-        if (userResult.Failed(out var errors))
-        {
-            return Failure<Guid>(errors);
-        }
-
-        return Success(userResult.Value);
+        return userResult.Match(Success, Failure<Guid>);
     }
 
     public async Task<Result<Guid>> UpdateAsync(AuthUserDto userDto)

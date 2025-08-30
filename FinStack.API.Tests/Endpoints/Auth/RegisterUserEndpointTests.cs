@@ -4,32 +4,24 @@ using FinStack.Contracts.Auth;
 using FinStack.Contracts.Users;
 using FinStack.Infrastructure.Data;
 
-namespace FinStack.API.Tests.Endpoints.Auth;
+namespace FinStack.API.Tests.Endpoints;
 
 [Collection(EndpointCollection.Definition)]
-public class RegisterUserEndpointTests : IClassFixture<TestWebApplicationFactory>, IAsyncLifetime
+public class RegisterUserEndpointTests : IAsyncLifetime
 {
-    private readonly IServiceScope _scope;
+    private readonly TestWebApplicationFactory _factory;
     private readonly HttpClient _client;
-
     public RegisterUserEndpointTests(TestWebApplicationFactory factory)
     {
-        _scope = factory.Services.CreateScope();
+        _factory = factory;
         _client = factory.CreateClient();
         _client.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Test");
     }
 
-    public async Task InitializeAsync()
-    {
-        var context = _scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await context.EnsureConnectionAsync();
-        await context.TruncateAllTablesAsync();
-        await context.EnsureConnectionClosedAsync();
-    }
-
+    public async Task InitializeAsync() => await _factory.ResetDatabaseAsync();
     public Task DisposeAsync() => Task.CompletedTask;
-
+    
     [Fact]
     public async Task RegisterUser_ShouldPass()
     {
