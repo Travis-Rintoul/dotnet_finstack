@@ -11,7 +11,7 @@ namespace FinStack.API.Controllers;
 [Authorize]
 [ApiController]
 [Route(UserEndpoints.Controller)]
-public class UserController(IMediator mediator, IEngineService engine) : ControllerBase
+public class UserController(IMediator mediator, IRustEngineService engine) : ControllerBase
 {
     [HttpGet(UserEndpoints.GetUsers)]
     public async Task<ActionResult<IEnumerable<GetUsersResponseDto>>> GetUsers()

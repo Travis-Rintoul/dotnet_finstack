@@ -1,8 +1,7 @@
 use serde_json::from_str;
 
 use crate::{
-    services::{command_and_query_service::Command, job_scheduler::schedule_job_and_run},
-    utils::{ptr_to_string, setup_logger},
+    config::{Config, CONFIG}, services::{command_and_query_service::Command, job_scheduler::schedule_job_and_run}, utils::{ptr_to_string, setup_logger}
 };
 mod config;
 mod db;
@@ -28,11 +27,31 @@ pub struct JobResult {
 }
 
 #[unsafe(no_mangle)]
+
+pub unsafe extern "C" fn configure(pointer: *const u8, len: usize) -> i32 {
+    let slice = unsafe { std::slice::from_raw_parts(pointer, len) };
+    match serde_json::from_slice::<Config>(slice) {
+        Ok(config) => {
+            if config.mode != "Test" {
+                config.connection_string.contains("finstack_db"); // TODO: replace this
+            }
+            CONFIG.set(config).map(|_| 0).unwrap_or(1)
+        }
+        Err(_) => 3,
+    }
+}
+
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn schedule_job(
     command_code_ptr: *const i8,
     command_body_ptr: *const i8,
 ) -> i32 {
     fn inner(command_code_ptr: *const i8, command_body_ptr: *const i8) -> Result<JobGuid, i32> {
+
+        if CONFIG.get().is_none() {
+            return Err(9999);
+        }
+
         if let Err(e) = setup_logger() {
             eprintln!("Logger initialization failed: {}", e);
             return Err(-1);

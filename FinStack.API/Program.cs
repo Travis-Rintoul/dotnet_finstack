@@ -31,7 +31,7 @@ public class Program {
             .AddDefaultTokenProviders();
 
         builder.Services.AddScoped<IAuthService, AuthService>();
-        builder.Services.AddScoped<IEngineService, RustFinancialEngine>();
+        builder.Services.AddScoped<IRustEngineService, RustEngineService>();
 
         builder.Services.AddAuthentication(options =>
                 {
