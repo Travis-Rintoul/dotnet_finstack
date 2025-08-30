@@ -4,7 +4,17 @@ namespace FinStack.Common;
 
 public class Result<T>
 {
-    public T? Value { get; }
+    private readonly T _value;
+    public T Value
+    {
+        get
+        {
+            if (IsFailure)
+                throw new InvalidOperationException("Cannot access Value when result is a failure.");
+            return _value;
+        }
+    }
+
     public IReadOnlyList<Error> Errors { get; }
     public IReadOnlyList<string> ErrorCodes {
         get
@@ -18,27 +28,31 @@ public class Result<T>
 
     public Result(T value)
     {
-        Value = value;
+        _value = value;
         Errors = new List<Error>();
     }
 
     public Result(Error error)
     {
+        _value = default!;
         Errors = new List<Error> { error };
     }
 
     public Result(IEnumerable<Error> errors)
     {
+        _value = default!;
         Errors = errors.ToList();
     }
 
     public Result(string code, string message)
     {
+        _value = default!;
         Errors = [new Error(code, message)];
     }
 
     public Result(IEnumerable<IdentityError> errors)
     {
+        _value = default!;
         Errors = errors.Select(e => new Error(e.Code, e.Description)).ToList();
     }
 
@@ -74,7 +88,7 @@ public class Result<T>
         }
     }
 
-    public T? Unwrap()
+    public T Unwrap()
     {
         if (!IsSuccess)
         {
@@ -91,9 +105,14 @@ public class Result<T>
 
 public static class Result
 {
-    public static Result<T> Success<T>(T value) => new (value);
+    public static Result<T> Success<T>(T value) => new(value);
     public static Result<T> Failure<T>(Error error) => new(error);
     public static Result<T> Failure<T>(string code, string message) => new(new Error(code, message));
     public static Result<T> Failure<T>(IEnumerable<Error> errors) => new(errors);
     public static Result<T> Failure<T>(IEnumerable<IdentityError> errors) => new(errors);
+    public static async Task<T> UnwrapAsync<T>(this Task<Result<T>> task) where T : notnull
+    {
+        var result = await task.ConfigureAwait(false);
+        return result.Unwrap();
+    }
 }
