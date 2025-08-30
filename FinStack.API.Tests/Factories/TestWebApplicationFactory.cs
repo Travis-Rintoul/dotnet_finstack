@@ -8,7 +8,7 @@ using Npgsql;
 
 namespace FinStack.API.Tests.Factories;
 
-public class TestWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
+public class TestWebApplicationFactory : WebApplicationFactory<Program>
 {
     private string? dbConnectionString;
 
@@ -54,9 +54,6 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>, IAsyncL
             }
         });
     }
-
-    public Task InitializeAsync() => Task.CompletedTask;
-    public Task DisposeAsync() => Task.CompletedTask;
 
     public async Task ResetDatabaseAsync()
     {

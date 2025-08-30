@@ -4,16 +4,18 @@ public static class TestApplicationFactoryExtensions
 {
     public static async Task RunScopedAsync<T>(
         this TestWebApplicationFactory factory,
-        Func<T, Task> action)
+        Func<T, Task> func)
+        where T : notnull
     {
         using var scope = factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<T>();
-        await action(service);
+        await func(service);
     }
 
     public static async Task<TResult> RunScopedAsync<T, TResult>(
         this TestWebApplicationFactory factory,
         Func<T, Task<TResult>> func)
+        where T : notnull
     {
         using var scope = factory.Services.CreateScope();
         var service = scope.ServiceProvider.GetRequiredService<T>();
