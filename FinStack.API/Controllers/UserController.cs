@@ -5,6 +5,7 @@ using FinStack.Application.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using FinStack.Application.Commands;
 using FinStack.Contracts.Users;
+using System.Text.Json;
 
 namespace FinStack.API.Controllers;
 
@@ -80,7 +81,23 @@ public class UserController(IMediator mediator, IRustEngineService engine) : Con
     [HttpGet("test")]
     public async Task<ActionResult> Test()
     {
-        string json = "{ \"command_name\": \"import-file\", \"file_name\": \"test.json\" }";
-        return Ok(engine.ProcessJob("import-file", json));
+        var code = "test";
+        var bodyObject = new
+        {
+            command_name = code,
+            create_job = true,
+            sleep_seconds = 2,
+        };
+
+        engine.Configure(new EngineConfig {
+            enviroment = "Test",
+            user = "postgres",
+            password = "postgres",
+            host = "localhost",
+            port = "5432",
+            database = "finstack_api_test_db",
+        });
+
+        return Ok(engine.ProcessJob(code, JsonSerializer.Serialize(bodyObject)));
     }
 }
