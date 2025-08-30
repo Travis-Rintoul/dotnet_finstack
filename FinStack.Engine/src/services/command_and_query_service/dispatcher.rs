@@ -11,6 +11,7 @@ pub struct CQRSDispatcher {
     services: Arc<CQRSDependencies>,
 }
 
+#[allow(dead_code)]
 impl CQRSDispatcher {
     pub fn new(services: Arc<CQRSDependencies>) -> Self {
         Self { services }

@@ -9,7 +9,6 @@ use crate::services::command_and_query_service::{traits::CommandTrait, CQRSDepen
 #[derive(Deserialize, Debug)]
 pub struct TestCommand {
     pub sleep_seconds: u64,
-    pub create_job: bool,
 }
 
 #[async_trait]

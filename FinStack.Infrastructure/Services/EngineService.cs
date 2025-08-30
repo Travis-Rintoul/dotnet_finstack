@@ -22,7 +22,7 @@ public class RustEngineService : IRustEngineService
   {
     var guidBytes = new byte[16];
     int rc = schedule_job(jobCode, json, guidBytes);
-    if (rc != 0)
+    if (rc != 1)
     {
       throw new InvalidOperationException($"Rust job failed with error {rc}");
     }

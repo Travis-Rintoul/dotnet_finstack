@@ -23,6 +23,7 @@
 - [ ] Order validation logic (limits, balances)  
 - [ ] Portfolio tracking (in-memory for now)
 - [x] Testing framework layed out
+- [x] FFI Bridge Tested
 
 ### 🌐 API Development
 - [ ] Define and expose REST endpoints:

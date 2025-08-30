@@ -3,7 +3,10 @@ use std::ptr;
 use serde_json::from_str;
 
 use crate::{
-    config::{Config, CONFIG}, services::{command_and_query_service::Command, job_scheduler::schedule_job_and_run}, utils::{ptr_to_string, setup_logger}
+    config::{CONFIG, Config},
+    models::JobGuid,
+    services::{command_and_query_service::Command, job_scheduler::schedule_job_and_run},
+    utils::{ptr_to_string, setup_logger},
 };
 mod config;
 mod db;
@@ -13,23 +16,7 @@ mod models;
 mod services;
 mod utils;
 
-#[repr(C)]
-pub struct JobGuid([u8; 16]);
-
-impl JobGuid {
-    pub fn as_bytes(&self) -> &[u8] {
-        &self.0
-    }
-}
-
-#[repr(C)]
-pub struct JobResult {
-    pub error_code: i32,
-    pub guid: [u8; 16],
-}
-
 #[unsafe(no_mangle)]
-
 pub extern "C" fn configure(pointer: *const u8, len: usize) -> i32 {
     if pointer.is_null() || len == 0 {
         eprintln!("configure: null pointer or zero length");
@@ -67,7 +54,7 @@ pub unsafe extern "C" fn schedule_job(
     command_body_ptr: *const i8,
     guid_out_ptr: *mut u8,
 ) -> i32 {
-
+    // Needed to be able to convert to a readable format in C#
     fn to_dotnet_guid_bytes(rfc: &[u8; 16]) -> [u8; 16] {
         let mut b = *rfc;
         b[0..4].reverse();
@@ -77,9 +64,8 @@ pub unsafe extern "C" fn schedule_job(
     }
 
     fn inner(command_code_ptr: *const i8, command_body_ptr: *const i8) -> Result<JobGuid, i32> {
-
         if CONFIG.get().is_none() {
-            return Err(9999);
+            return Err(0);
         }
 
         if let Err(e) = setup_logger() {
@@ -111,10 +97,8 @@ pub unsafe extern "C" fn schedule_job(
         Ok(guid) => {
             let dotnet = to_dotnet_guid_bytes(&guid.0);
             unsafe { ptr::copy_nonoverlapping(dotnet.as_ptr(), guid_out_ptr, 16) };
-            0
+            1
         }
-        Err(code) => {
-            code
-        }
+        Err(code) => code,
     }
 }
