@@ -1,0 +1,17 @@
+<button class="button" (click)="test()">Load Users</button>
+
+<ui-card>
+    <ui-card-header>Users</ui-card-header>
+
+    @if (this.loading$ | async) {
+        <ui-loading />
+    }
+    @else {
+        <table>
+            <tr *ngFor="let user of this.users$ | async">
+                {{user.userGuid}}
+            </tr>
+        </table>
+    }
+
+</ui-card>
