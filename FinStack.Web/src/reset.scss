@@ -1,0 +1,140 @@
+/* =======================================
+   RESET / NORMALIZE BASELINE
+   ======================================= */
+
+/* Box sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Remove default margins/paddings */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* Set base line-height and font smoothing */
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%; /* Prevent iOS zooming */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base font */
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 1rem;
+  font-weight: 400;
+  background-color: #fff;
+  color: #111;
+  text-rendering: optimizeLegibility;
+}
+
+/* Remove built-in styles on headings */
+h1, h2, h3, h4, h5, h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/* Remove default list styles */
+ul, ol {
+  list-style: none;
+}
+
+/* Remove link underlines, keep accessible focus */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:focus {
+  outline: 2px solid Highlight;
+  outline-offset: 2px;
+}
+
+/* Reset images and media */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Reset form elements */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  appearance: none;
+}
+button {
+  cursor: pointer;
+}
+textarea {
+  resize: vertical;
+}
+
+/* Table reset */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+}
+th, td {
+  text-align: left;
+  font-weight: normal;
+  vertical-align: top;
+}
+
+/* Remove quotes in blockquote & q */
+blockquote, q {
+  quotes: none;
+}
+blockquote::before,
+blockquote::after,
+q::before,
+q::after {
+  content: '';
+}
+
+/* Remove strong/bold defaults */
+b, strong {
+  font-weight: 600;
+}
+
+/* Remove italic defaults */
+i, em {
+  font-style: normal;
+}
+
+/* Reset hr */
+hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 1rem 0;
+}
+
+/* Reset code */
+code, pre, samp, kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 0.95em;
+}
+
+/* Hidden */
+[hidden] {
+  display: none !important;
+}
+
+/* Accessibility */
+:focus {
+  outline: 2px solid #2563eb; /* Blue focus ring */
+  outline-offset: 2px;
+}
